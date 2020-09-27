@@ -22,10 +22,9 @@ namespace Neat.Config
 		//Selection
 
 		//mutation
-		public int weightMutationProbability = 60;
-		public int geneMutationProbability = 20;
-		public int nodeMutationProbability = 20;
-		public int geneWeightChangeProbability = 10;
+		public int geneWeightChangeProbability = 50;
+		public int geneMutationProbability = 25;
+		public int nodeMutationProbability = 25;
 		public bool randomWeightMutation = false;
 		public double weightDeltaOnMutation = 0.1;
 		//mutation

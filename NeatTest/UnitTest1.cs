@@ -1,15 +1,24 @@
 using NUnit.Framework;
 using Neat.Network;
-using Neat.Util;
+using Neat.Framework;
 using System;
 using System.Collections.Generic;
 namespace NeatTest
 {
     public class Tests
     {
+        Genome genome1;
+        Genome genome2;
+        List<Node> inputNodes;
+        List<Node> outputNodes;
+
         [SetUp]
         public void Setup()
         {
+            inputNodes = getInputNodeSets();
+            outputNodes = getOutputNodeSets();
+            genome1 = new Genome(inputNodes, outputNodes);
+            genome2 = new Genome(inputNodes, outputNodes);
         }
         [TearDown]
         public void tearDown()
@@ -47,16 +56,12 @@ namespace NeatTest
         [Test]
         public void CreateGenomeTest()
         {
-            List<Node> inputNodes = getInputNodeSets();
-            List<Node> outputNodes = getOutputNodeSets();
-            Genome genome1 = new Genome(inputNodes, outputNodes);
             genome1.fitnessScore = 4;
             genome1.addNewGene(inputNodes[0], outputNodes[0], 1);
             genome1.addNewGene(inputNodes[0], outputNodes[1], 2);
             genome1.addNewGene(inputNodes[1], outputNodes[0], 3);
             genome1.addNewGene(inputNodes[2], outputNodes[1], 4);
             genome1.addNewGene(inputNodes[2], outputNodes[0], 5);
-            Genome genome2 = new Genome(inputNodes, outputNodes);
             genome2.fitnessScore = 10;
             genome2.addNewGene(inputNodes[0], outputNodes[1], -1);
             genome2.addNewGene(inputNodes[1], outputNodes[0], -2);
@@ -72,15 +77,11 @@ namespace NeatTest
         [Test]
         public void CrossoverTest2()
         {
-            List<Node> inputNodes = getInputNodeSets();
-            List<Node> outputNodes = getOutputNodeSets();
-            Genome genome1 = new Genome(inputNodes, outputNodes);
             genome1.addNewGene(inputNodes[0], outputNodes[0], 1);
             genome1.addNewGene(inputNodes[0], outputNodes[1], 2);
             genome1.addNewGene(inputNodes[1], outputNodes[0], 3);
             genome1.addNewGene(inputNodes[2], outputNodes[1], 4);
             genome1.addNewGene(inputNodes[2], outputNodes[0], 5);
-            Genome genome2 = new Genome(inputNodes, outputNodes);
             genome2.addNewGene(inputNodes[0], outputNodes[1], -1);
             genome2.addNewGene(inputNodes[1], outputNodes[0], -2);
             genome2.addNewGene(inputNodes[1], outputNodes[1], -3);
@@ -113,12 +114,8 @@ namespace NeatTest
         [Test]
         public void CrossoverTest3()
         {
-            List<Node> inputNodes = getInputNodeSets();
-            List<Node> outputNodes = getOutputNodeSets();
-            Genome genome1 = new Genome(inputNodes, outputNodes);
             genome1.addNewGene(inputNodes[0], outputNodes[0], 1);
             genome1.addNewGene(inputNodes[0], outputNodes[1], 2);
-            Genome genome2 = new Genome(inputNodes, outputNodes);
             genome2.addNewGene(inputNodes[1], outputNodes[0], -2);
             genome2.addNewGene(inputNodes[1], outputNodes[1], -3);
 
@@ -149,9 +146,6 @@ namespace NeatTest
         [Test]
         public void addHiddenNodeTest()
         {
-            List<Node> inputNodes = getInputNodeSets();
-            List<Node> outputNodes = getOutputNodeSets();
-            Genome genome1 = new Genome(inputNodes, outputNodes);
             genome1.fitnessScore = 4;
             genome1.addNewGene(inputNodes[0], outputNodes[0], 1);
             genome1.addNewGene(inputNodes[0], outputNodes[1], 2);
@@ -171,6 +165,71 @@ namespace NeatTest
             Assert.AreEqual(newGene2.from, newNode);
             Assert.AreEqual(newGene2.to, g.to);
             Assert.AreEqual(newGene2.weight, g.weight);
+        }
+        [Test]
+        public void weightMutationTest()
+        {
+            genome1.fitnessScore = 4;
+            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
+            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
+            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
+            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
+            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
+
+            // checking weight mutation
+            NeatMain.config.geneWeightChangeProbability = 100;
+            NeatMain.config.geneMutationProbability = 0;
+            NeatMain.config.nodeMutationProbability = 0;
+            NeatMain.config.randomWeightMutation = false;
+            genome1.mutateGenome();
+            // weight mutation of +- weightdelta in config should occur in one gene
+            int weightMutatedCount = 0;
+            double[] originalWeights = { 0.1, 0.2, 0.3, 0.4, 0.5 };
+            int idx = 0;
+            foreach(Gene gene in genome1.getGenes())
+            {
+                if (originalWeights[idx] != gene.weight)
+                {
+                    double delta = gene.weight - originalWeights[idx];
+                    if (!(delta == NeatMain.config.weightDeltaOnMutation
+                        || delta == -NeatMain.config.weightDeltaOnMutation))
+                    {
+                        Assert.Fail();
+                    }
+                    weightMutatedCount++;
+                }
+            }
+            Assert.AreEqual(weightMutatedCount, 1);
+            Assert.Pass();
+        }
+        public void weightMutationTest2()
+        {
+            genome1.fitnessScore = 4;
+            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
+            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
+            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
+            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
+            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
+
+            // checking weight mutation
+            NeatMain.config.geneWeightChangeProbability = 100;
+            NeatMain.config.geneMutationProbability = 0;
+            NeatMain.config.nodeMutationProbability = 0;
+            NeatMain.config.randomWeightMutation = true;
+            genome1.mutateGenome();
+            // weight mutation of +- weightdelta in config should occur in only one gene
+            int weightMutatedCount = 0;
+            double[] originalWeights = { 0.1, 0.2, 0.3, 0.4, 0.5 };
+            int idx = 0;
+            foreach (Gene gene in genome1.getGenes())
+            {
+                if (originalWeights[idx] != gene.weight)
+                {
+                    weightMutatedCount++;
+                }
+            }
+            Assert.AreEqual(weightMutatedCount, 1);
+            Assert.Pass();
         }
         void printGenome(Genome genome)
         {

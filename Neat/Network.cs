@@ -101,7 +101,7 @@ namespace Neat.Network
             this.genes = genes;
         }
 
-        public void addNewGene(Node from, Node to, double weight)
+        public bool addNewGene(Node from, Node to, double weight)
         {
             // Gene validations
             if (!((inputNodes.Contains(from) || hiddenNodes.Contains(from))
@@ -119,15 +119,15 @@ namespace Neat.Network
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 // fetch index of gene where it should be inserted
                 int idx = searchForGenePosition(newGene);
-                // check if gene is already present
                 if (idx >= this.genes.Count)
                 {
                     this.genes.Add(newGene);
-                    return;
+                    return true;
                 }
+                // check if gene is already present
                 if (this.genes[idx].inovationNumber == newInovationNumber)
                 {
-                    return;
+                    return false;
                 }
                 // largest inovation number in all genome
                 else
@@ -142,9 +142,10 @@ namespace Neat.Network
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 this.genes.Add(newGene);
             }
+            return true;
         }
 
-        private Node addHiddenNodeBetween(Gene gene) {
+        public Node addHiddenNodeBetween(Gene gene) {
             // create node id based on the number of nodes that have been created for this structure
             // If any duplicate mutation occurs within the same generation, this will help kekep track
             // and not create a new inovation number for the duplication
@@ -299,18 +300,14 @@ namespace Neat.Network
                     Node from = RandomGenerator.getRandomElementFromList<Node>(possibleFromNodes);
                     Node to = RandomGenerator.getRandomElementFromList<Node>(possibleToNodes);
                     double weight = RandomGenerator.getRandomDouble();
-                    this.addNewGene(from, to, weight);
+                    if(!this.addNewGene(from, to, weight))
+                    {
+                        // if gene to be added is already present, change weight
+                        mutateRandomGeneWeight();
+                    }
                     break;
                 case MutationType.MODIFY_WEIGHT:
-                    Gene g = RandomGenerator.getRandomElementFromList(this.genes);
-                    if (NeatMain.config.randomWeightMutation)
-                    {
-                        g.weight = RandomGenerator.getRandomDouble();
-                    }
-                    else
-                    {
-                        g.weight += (double) RandomGenerator.chooseAtRandom(NeatMain.config.weightDeltaOnMutation, -NeatMain.config.weightDeltaOnMutation);
-                    }
+                    mutateRandomGeneWeight();
                     break;
                 case MutationType.ADD_NODE:
                     Gene gene = RandomGenerator.getRandomElementFromList(this.genes);
@@ -318,5 +315,22 @@ namespace Neat.Network
                     break;
             }
         }
+        private void mutateRandomGeneWeight()
+        {
+            Gene g = RandomGenerator.getRandomElementFromList(this.genes);
+            if (NeatMain.config.randomWeightMutation)
+            {
+                g.weight = RandomGenerator.getRandomDouble();
+            }
+            else
+            {
+                g.weight += (double)RandomGenerator.chooseAtRandom(
+                    NeatMain.config.weightDeltaOnMutation, -NeatMain.config.weightDeltaOnMutation);
+            }
+            g.weight = max(NeatMain.config.minWeight, min(NeatMain.config.maxWeight, g.weight));
+        }
+        private double min(double a, double b) => a < b ? a : b;
+
+        private double max(double a, double b) => a > b ? a : b;
     }
 }
