@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using Neat.Network;
+using Neat.Components;
 using Neat.Framework;
 using System;
 using System.Collections.Generic;

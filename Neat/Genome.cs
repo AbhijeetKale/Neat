@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Neat.Util;
 using Neat.Framework;
-namespace Neat.Network
+namespace Neat.Components
 {
     public enum NodeType
     {

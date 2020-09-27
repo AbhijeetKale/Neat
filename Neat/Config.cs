@@ -4,10 +4,10 @@ namespace Neat.Config
     public class NeatConfig
     {
 		//speciation
-		public double delta_Threshhold = 2.0;
+		public double delta_Threshhold = 4.0;
 		public double delta_C1 = 0.7;
-		public double delta_C2 = 0.7;
-		public double delta_C3 = 0.3;
+		public double delta_C2 = 0.6;
+		public double delta_C3 = 0.2;
 		public int population_Normalization_Threshold = 20;
 		//speciation
 
