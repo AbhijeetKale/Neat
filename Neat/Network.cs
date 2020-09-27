@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Neat.Util;
+using Neat.Framework;
 namespace Neat.Network
 {
     public enum NodeType
@@ -8,6 +9,13 @@ namespace Neat.Network
         INPUT,
         OUTPUT,
         HIDDEN
+    }
+
+    public enum MutationType
+    {
+        MODIFY_WEIGHT,
+        ADD_GENE,
+        ADD_NODE
     }
 
     public class Node
@@ -136,7 +144,7 @@ namespace Neat.Network
             }
         }
 
-        public Node addHiddenNodeBetween(Gene gene) {
+        private Node addHiddenNodeBetween(Gene gene) {
             // create node id based on the number of nodes that have been created for this structure
             // If any duplicate mutation occurs within the same generation, this will help kekep track
             // and not create a new inovation number for the duplication
@@ -263,9 +271,52 @@ namespace Neat.Network
             return new Genome(crossoverResult);
         }
 
-        public void mutateRandomGene()
+        public void mutateGenome()
         {
-
+            int[] mutationProbabiliteis = { NeatMain.config.geneWeightChangeProbability,
+                NeatMain.config.geneMutationProbability, NeatMain.config.nodeMutationProbability};
+            MutationType[] mutations = { MutationType.MODIFY_WEIGHT, MutationType.ADD_GENE, MutationType.ADD_NODE};
+            MutationType mutation = RandomGenerator.getElementBasedonProbablity(
+                new List<MutationType>(mutations), mutationProbabiliteis);
+            switch(mutation)
+            {
+                case MutationType.ADD_GENE:
+                    List<Node> possibleFromNodes = new List<Node>();
+                    List<Node> possibleToNodes = new List<Node>();
+                    foreach (Node node in inputNodes)
+                    {
+                        possibleFromNodes.Add(node);
+                    }
+                    foreach (Node node in hiddenNodes)
+                    {
+                        possibleFromNodes.Add(node);
+                        possibleToNodes.Add(node);
+                    }
+                    foreach (Node node in outputNodes)
+                    {
+                        possibleToNodes.Add(node);
+                    }
+                    Node from = RandomGenerator.getRandomElementFromList<Node>(possibleFromNodes);
+                    Node to = RandomGenerator.getRandomElementFromList<Node>(possibleToNodes);
+                    double weight = RandomGenerator.getRandomDouble();
+                    this.addNewGene(from, to, weight);
+                    break;
+                case MutationType.MODIFY_WEIGHT:
+                    Gene g = RandomGenerator.getRandomElementFromList(this.genes);
+                    if (NeatMain.config.randomWeightMutation)
+                    {
+                        g.weight = RandomGenerator.getRandomDouble();
+                    }
+                    else
+                    {
+                        g.weight += (double) RandomGenerator.chooseAtRandom(NeatMain.config.weightDeltaOnMutation, -NeatMain.config.weightDeltaOnMutation);
+                    }
+                    break;
+                case MutationType.ADD_NODE:
+                    Gene gene = RandomGenerator.getRandomElementFromList(this.genes);
+                    addHiddenNodeBetween(gene);
+                    break;
+            }
         }
     }
 }
