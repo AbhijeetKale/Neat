@@ -194,14 +194,17 @@ namespace NeatTest
                     if (!(delta == NeatMain.config.weightDeltaOnMutation
                         || delta == -NeatMain.config.weightDeltaOnMutation))
                     {
-                        Assert.Fail();
+                       Assert.Fail();
                     }
                     weightMutatedCount++;
                 }
+                idx++;
             }
             Assert.AreEqual(weightMutatedCount, 1);
             Assert.Pass();
         }
+
+        [Test]
         public void weightMutationTest2()
         {
             genome1.fitnessScore = 4;
@@ -223,11 +226,12 @@ namespace NeatTest
             int idx = 0;
             foreach (Gene gene in genome1.getGenes())
             {
-                if (originalWeights[idx] != gene.weight)
+                if (originalWeights[idx++] != gene.weight)
                 {
                     weightMutatedCount++;
                 }
             }
+            Console.WriteLine(weightMutatedCount);
             Assert.AreEqual(weightMutatedCount, 1);
             Assert.Pass();
         }
