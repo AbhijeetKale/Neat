@@ -67,7 +67,7 @@ namespace Neat.Framework
         {
             if (representativeGenome == null)
             {
-                return false;
+                return true;
             }
             int i = 0, j = 0;
             int matchingGenesCount = 0;

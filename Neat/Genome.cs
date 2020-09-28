@@ -328,6 +328,8 @@ namespace Neat.Components
                     NeatMain.config.weightDeltaOnMutation, -NeatMain.config.weightDeltaOnMutation);
             }
             g.weight = max(NeatMain.config.minWeight, min(NeatMain.config.maxWeight, g.weight));
+            // sometimes double arithemetic screws up. So rounding off:
+            g.weight = Math.Round(g.weight, 4);
         }
         private double min(double a, double b) => a < b ? a : b;
 

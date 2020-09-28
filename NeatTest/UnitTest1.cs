@@ -190,7 +190,7 @@ namespace NeatTest
             {
                 if (originalWeights[idx] != gene.weight)
                 {
-                    double delta = gene.weight - originalWeights[idx];
+                    double delta = Math.Round(gene.weight - originalWeights[idx], 4);
                     if (!(delta == NeatMain.config.weightDeltaOnMutation
                         || delta == -NeatMain.config.weightDeltaOnMutation))
                     {
@@ -235,6 +235,31 @@ namespace NeatTest
             Assert.AreEqual(weightMutatedCount, 1);
             Assert.Pass();
         }
+
+        [Test]
+        public void speciesTest()
+        {
+            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
+            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
+            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
+            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
+            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
+            genome2.addNewGene(inputNodes[0], outputNodes[1], -0.1);
+            genome2.addNewGene(inputNodes[1], outputNodes[0], -0.2);
+            genome2.addNewGene(inputNodes[1], outputNodes[1], -0.3);
+            genome2.addNewGene(inputNodes[2], outputNodes[1], -0.4);
+            genome2.addNewGene(inputNodes[2], outputNodes[0], -0.5);
+            Species species = new Species();
+            if(!species.tryAddingGenome(genome1))
+            {
+                Assert.Fail();
+                return;
+            }
+            bool check = species.checkCompatibility(genome2);
+            Assert.AreEqual(check, true);
+            Assert.Pass();
+        }
+
         void printGenome(Genome genome)
         {
             foreach(Gene gene in genome.getGenes())
