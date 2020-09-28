@@ -18,7 +18,7 @@ namespace Neat.Config
 
 		//Selection
 		public double populationSruvivalPercentage = 50;
-		public int minimumPopulation = 5;
+		public int minimumPopulation = 200;
 		//Selection
 
 		//mutation

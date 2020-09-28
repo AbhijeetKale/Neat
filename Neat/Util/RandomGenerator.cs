@@ -25,6 +25,12 @@ namespace Neat.Util
             return r.Next() % 2 == 0 ? k : -k;
         }
 
+        public static int randomNumBefore(int i)
+        {
+            Random r = new Random();
+            return r.Next() % i;
+        }
+
         public static T getElementBasedonProbablity<T>(List<T> elements, int[] probPercentage)
         {
             int sum = 0;

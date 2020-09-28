@@ -4,21 +4,101 @@ using Neat.Components;
 using Neat.Util;
 namespace Neat.Framework
 {
+    #region NeatMain
     public class NeatMain
     {
-        public static NeatConfig config = new NeatConfig();
+        public static NeatConfig config;
 
         protected int innovationNumber = 1;
 
-        public NeatMain() {
-            
+        List<Node> inputNodes;
+        List<Node> outputNodes;
+        List<Species> speciesCollection;
+        // index of species current blac box containing genome belongs to
+        int currentBlackBoxSpeciesIdx;
+        // index of genome in current blac box wihtin a species
+        int currentBlackBoxIdx;
+
+        public NeatMain(NeatConfig config, int inputNodeCount, int outputNodeCount, int initPopulationCount) {
+            NeatMain.config = config ?? new NeatConfig();
+            speciesCollection = new List<Species>();
+            inputNodes = new List<Node>();
+            int id = 1;
+            for (int count = 0; count < inputNodeCount; count++)
+            {
+                inputNodes.Add(new Node(id++, NodeType.INPUT));
+            }
+            outputNodes = new List<Node>();
+            for (int count = 0; count < outputNodeCount; count++)
+            {
+                outputNodes.Add(new Node(id++, NodeType.OUTPUT));
+            }
+            currentBlackBoxIdx = 0;
+            currentBlackBoxSpeciesIdx = 0;
+            initPopulation(initPopulationCount);
         }
 
-        public NeatMain(NeatConfig config)
+        private void initPopulation(int initPopulationCount)
         {
-            NeatMain.config = config;
+            // Initializing a species
+            speciesCollection.Add(new Species());
+            for(int count = 0; count < initPopulationCount; count++)
+            {
+                int minGenesCount = 1;
+                int maxGenesCount = inputNodes.Count * outputNodes.Count;
+                Genome genome = new Genome(inputNodes, outputNodes);
+                int numOfGenes = min(minGenesCount, RandomGenerator.randomNumBefore(maxGenesCount));
+                for(int i = 0; i < numOfGenes; i++)
+                {
+                    Node from = RandomGenerator.getRandomElementFromList(inputNodes);
+                    Node to = RandomGenerator.getRandomElementFromList(outputNodes);
+                    double weight = RandomGenerator.getRandomDouble();
+                    // already existing genes would not be added to same genome
+                    // even if it's not added, it would not be a problem since
+                    // our purpose is to randomly initialize genomes
+                    genome.addNewGene(from, to, weight);
+                }
+                chooseSpecies(genome);
+            }
         }
+        private int min(int a, int b) => a < b ? a : b;
+
+        // check which species the genome belongs to. Create a new species if does not belong to any
+        private void chooseSpecies(Genome genome)
+        {
+            bool belongs = false;
+            foreach (Species species in speciesCollection)
+            {
+                if (species.tryAddingGenome(genome)) {
+                    belongs = true;
+                    break;
+                }
+            }
+            if (!belongs)
+            {
+                Species newSpecies = new Species();
+                newSpecies.tryAddingGenome(genome);
+                speciesCollection.Add(newSpecies);
+            }
+        }
+
+        // reset all static things
+        public void reset()
+        {
+            config = new NeatConfig();
+            Genome.resetInovations();
+        }
+
+        // after the whole population is done, check it's evaluation
+        public void evaluateGeneration()
+        {
+
+        }
+
     }
+    #endregion
+
+    #region species
     public class Species
     {
         private List<Genome> speciesPopulation;
@@ -32,6 +112,8 @@ namespace Neat.Framework
             representativeGenome = null;
         }
 
+        public int populationCount() => speciesPopulation.Count;
+
         public void setRandomRepresentative()
         {
             if (speciesPopulation.Count == 0)
@@ -44,6 +126,9 @@ namespace Neat.Framework
                     RandomGenerator.getRandomElementFromList<Genome>(speciesPopulation);
             }
         }
+
+        public Genome getGenome(int idx) =>
+            idx >= 0 && idx < speciesPopulation.Count ? speciesPopulation[idx] : null;
 
         public bool tryAddingGenome(Genome genome)
         {
@@ -118,4 +203,5 @@ namespace Neat.Framework
         }
         private double abs(double a) => a < 0 ? -a : a;
     }
+    #endregion
 }

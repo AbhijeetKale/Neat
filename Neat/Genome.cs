@@ -18,7 +18,7 @@ namespace Neat.Components
         ADD_NODE
     }
 
-    public class Node
+    public class Node : ICloneable
     {
         int nodeId;
         NodeType nodetype;
@@ -27,6 +27,11 @@ namespace Neat.Components
         {
             this.nodeId = nodeId;
             this.nodetype = nodeType;
+        }
+
+        public object Clone()
+        {
+            return new Node(this.nodeId, this.nodetype);
         }
 
         public override bool Equals(object node)
@@ -85,6 +90,7 @@ namespace Neat.Components
             this.inputNodes = inputNodes;
             this.outputNodes= outputNodes;
             this.hiddenNodes = new List<Node>();
+            fitnessScore = 0;
         }
 
         // done just for testing
@@ -96,9 +102,11 @@ namespace Neat.Components
 
         public List<Gene> getGenes() => this.genes;
 
-        private Genome(List<Gene> genes)
+        private Genome(List<Gene> genes, List<Node> inputNodes, List<Node> outputNodes)
         {
             this.genes = genes;
+            this.inputNodes = inputNodes;
+            this.outputNodes = outputNodes;
         }
 
         public bool addNewGene(Node from, Node to, double weight)
@@ -269,7 +277,7 @@ namespace Neat.Components
             {
                 crossoverResult.Add(parent2.genes[j++]);
             }
-            return new Genome(crossoverResult);
+            return new Genome(crossoverResult, parent1.inputNodes, parent1.outputNodes);
         }
 
         public void mutateGenome()
