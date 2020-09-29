@@ -15,7 +15,8 @@ namespace Neat.Components
     {
         MODIFY_WEIGHT,
         ADD_GENE,
-        ADD_NODE
+        ADD_NODE,
+        TOGGEL_GENE
     }
 
     public class Node : ICloneable
@@ -293,8 +294,10 @@ namespace Neat.Components
         public void mutateGenome()
         {
             int[] mutationProbabiliteis = { NeatMain.config.geneWeightChangeProbability,
-                NeatMain.config.geneMutationProbability, NeatMain.config.nodeMutationProbability};
-            MutationType[] mutations = { MutationType.MODIFY_WEIGHT, MutationType.ADD_GENE, MutationType.ADD_NODE};
+                NeatMain.config.geneMutationProbability, NeatMain.config.nodeMutationProbability,
+                NeatMain.config.disableGeneProbability};
+            MutationType[] mutations = { MutationType.MODIFY_WEIGHT, MutationType.ADD_GENE
+                    , MutationType.ADD_NODE, MutationType.TOGGEL_GENE};
             MutationType mutation = RandomGenerator.getElementBasedonProbablity(
                 new List<MutationType>(mutations), mutationProbabiliteis);
             switch(mutation)
@@ -330,6 +333,10 @@ namespace Neat.Components
                 case MutationType.ADD_NODE:
                     Gene gene = RandomGenerator.getRandomElementFromList(this.genes);
                     addHiddenNodeBetween(gene);
+                    break;
+                case MutationType.TOGGEL_GENE:
+                    Gene r = RandomGenerator.getRandomElementFromList(this.genes);
+                    r.disabled = !r.disabled;
                     break;
             }
             graphIsDirty = true;
@@ -399,15 +406,6 @@ namespace Neat.Components
             if (graphIsDirty)
             {
                 calcNodeDependencyGraph();
-            }
-            foreach(Node n in nodeDependencyGraph.Keys)
-            {
-                Console.Write("Node " + n.nodeId + ": ");
-                foreach(Gene r in nodeDependencyGraph[n])
-                {
-                    Console.Write("(" + r.from.nodeId + ", " + r.weight + ")");
-                }
-                Console.WriteLine();
             }
             foreach(Node node in outputNodes)
             {
