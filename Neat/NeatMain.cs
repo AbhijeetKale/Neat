@@ -98,6 +98,17 @@ namespace Neat.Framework
     }
     #endregion
 
+    public class NeatBox
+    {
+        private Genome genome;
+
+        public NeatBox(Genome genome)
+        {
+            this.genome = genome;
+        }
+    }
+
+
     #region species
     public class Species
     {

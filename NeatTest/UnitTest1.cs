@@ -27,20 +27,20 @@ namespace NeatTest
         }
         private List<Node> getInputNodeSets()
         {
-            Node[] nodes = new Node[7];
-            nodes[0] = new Node(1, NodeType.INPUT);
-            nodes[1] = new Node(2, NodeType.INPUT);
-            nodes[2] = new Node(3, NodeType.INPUT);
-            nodes[3] = new Node(4, NodeType.INPUT);
-            nodes[4] = new Node(5, NodeType.INPUT);
+            Node[] nodes = new Node[5];
+            nodes[0] = new Node(0, NodeType.INPUT);
+            nodes[1] = new Node(1, NodeType.INPUT);
+            nodes[2] = new Node(2, NodeType.INPUT);
+            nodes[3] = new Node(3, NodeType.INPUT);
+            nodes[4] = new Node(4, NodeType.INPUT);
             return new List<Node>(nodes);
         }
 
         private List<Node> getOutputNodeSets()
         {
             Node[] nodes = new Node[2];
-            nodes[0] = new Node(6, NodeType.OUTPUT);
-            nodes[1] = new Node(7, NodeType.OUTPUT);
+            nodes[0] = new Node(5, NodeType.OUTPUT);
+            nodes[1] = new Node(6, NodeType.OUTPUT);
             return new List<Node>(nodes);
         }
 
@@ -257,6 +257,27 @@ namespace NeatTest
             }
             bool check = species.checkCompatibility(genome2);
             Assert.AreEqual(check, true);
+            Assert.Pass();
+        }
+
+        [Test]
+        public void calculateOutputTest()
+        {
+            genome1.fitnessScore = 4;
+            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
+            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
+            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
+            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
+            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
+            Gene g = genome1.getGene(4);
+            Node newNode = genome1.addHiddenNodeBetween(g);
+            double[] input = { 1, 2, 3, 4, 5};
+            double[] result = { 2.2, 1.4};
+            List<double> output = genome1.calculateOutput(new List<double>(input));
+            for(int i = 0; i < output.Count; i++)
+            {
+                Assert.AreEqual(result[i], output[i]);
+            }
             Assert.Pass();
         }
 

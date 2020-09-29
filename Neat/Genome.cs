@@ -20,8 +20,8 @@ namespace Neat.Components
 
     public class Node : ICloneable
     {
-        int nodeId;
-        NodeType nodetype;
+        public int nodeId { get; }
+        public NodeType nodetype { get; }
 
         public Node(int nodeId, NodeType nodeType)
         {
@@ -48,12 +48,12 @@ namespace Neat.Components
 
     public class Gene: ICloneable
     {
-        public Node from;
-        public Node to;
-        public double weight;
-        public int inovationNumber { get; set; }
+        public Node from { get; }
+        public Node to { get; }
+        public double weight { get; set; }
+        public int inovationNumber { get; }
         // can be disabled
-        private bool disabled { get;  set; }
+        public bool disabled { get;  set; }
 
         public Gene(Node from, Node to, double weight, int inovationNumber)
         {
@@ -81,6 +81,11 @@ namespace Neat.Components
         private List<Node> hiddenNodes;
 
         private List<Gene> genes;
+
+        // 
+        private Dictionary<Node, List<Gene>> nodeDependencyGraph;
+
+        private bool graphIsDirty = true;
 
         public float fitnessScore { get; set; }
 
@@ -150,6 +155,7 @@ namespace Neat.Components
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 this.genes.Add(newGene);
             }
+            graphIsDirty = true;
             return true;
         }
 
@@ -161,11 +167,14 @@ namespace Neat.Components
             {
                 throw new ArgumentException("Gene passed is not present in Genome");
             }
-            Node newNode = new Node(this.genes.Count, NodeType.HIDDEN);
+            int totalNodes = inputNodes.Count + hiddenNodes.Count + outputNodes.Count;
+            // incremental node id
+            Node newNode = new Node(totalNodes, NodeType.HIDDEN);
             hiddenNodes.Add(newNode);
             this.removeGene(gene.inovationNumber);
             this.addNewGene(gene.from, newNode, 1.0);
             this.addNewGene(newNode, gene.to, gene.weight);
+            graphIsDirty = true;
             return newNode;
         }
 
@@ -176,6 +185,7 @@ namespace Neat.Components
                 int idx = searchForGenePosition(inovationNumber);
                 this.genes.RemoveAt(idx);
             }
+            graphIsDirty = true;
         }
 
         public Gene getGene(int inovationNumber)
@@ -322,6 +332,7 @@ namespace Neat.Components
                     addHiddenNodeBetween(gene);
                     break;
             }
+            graphIsDirty = true;
         }
         private void mutateRandomGeneWeight()
         {
@@ -342,5 +353,82 @@ namespace Neat.Components
         private double min(double a, double b) => a < b ? a : b;
 
         private double max(double a, double b) => a > b ? a : b;
+
+        private void calcNodeDependencyGraph()
+        {
+            this.nodeDependencyGraph = new Dictionary<Node, List<Gene>>();
+            foreach(Node node in inputNodes)
+            {
+                nodeDependencyGraph[node] = new List<Gene>();
+            }
+            foreach(Node node in hiddenNodes)
+            {
+                nodeDependencyGraph[node] = new List<Gene>();
+            }
+            foreach (Node node in outputNodes)
+            {
+                nodeDependencyGraph[node] = new List<Gene>();
+            }
+            foreach (Gene gene in this.genes)
+            {
+                if (!gene.disabled)
+                {
+                    nodeDependencyGraph[gene.to].Add(gene);
+                }
+            }
+            graphIsDirty = false;
+        }
+
+        public List<double> calculateOutput(List<double> inputs)
+        {
+            if (inputs.Count != inputNodes.Count)
+            {
+                throw new ArgumentException("Number of inputs incorrect");
+            }
+            int totalCount = inputNodes.Count + outputNodes.Count + hiddenNodes.Count;
+            double[] activationValues = new double[totalCount];
+            for(int i = 0; i < totalCount; i++)
+            {
+                activationValues[i] = default;
+            }
+            for(int i = 0; i < inputs.Count; i++)
+            {
+                activationValues[inputNodes[i].nodeId] = inputs[i];
+            }
+            List<double> output = new List<double>();
+            if (graphIsDirty)
+            {
+                calcNodeDependencyGraph();
+            }
+            foreach(Node n in nodeDependencyGraph.Keys)
+            {
+                Console.Write("Node " + n.nodeId + ": ");
+                foreach(Gene r in nodeDependencyGraph[n])
+                {
+                    Console.Write("(" + r.from.nodeId + ", " + r.weight + ")");
+                }
+                Console.WriteLine();
+            }
+            foreach(Node node in outputNodes)
+            {
+                setActivationValue(activationValues, node);
+                output.Add(Math.Round(activationValues[node.nodeId], 4));
+            }
+            return output;
+        }
+
+        private void setActivationValue(double[] activationValues, Node node)
+        {
+            activationValues[node.nodeId] = 0;
+            foreach(Gene gene in nodeDependencyGraph[node])
+            {
+                if (activationValues[gene.from.nodeId] == default)
+                {
+                    setActivationValue(activationValues, gene.from);
+                }
+                activationValues[node.nodeId] +=
+                    gene.weight * activationValues[gene.from.nodeId];
+            }
+        }
     }
 }
