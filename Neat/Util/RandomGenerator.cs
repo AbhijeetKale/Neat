@@ -18,6 +18,12 @@ namespace Neat.Util
             return list[idx];
         }
 
+        public static int getRandomIndexFromList<T>(List<T> list)
+        {
+            Random r = new Random();
+            return r.Next() % list.Count;
+        }
+
         public static double getRandomDouble()
         {
             Random r = new Random();

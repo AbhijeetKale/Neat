@@ -83,12 +83,14 @@ namespace Neat.Components
 
         private List<Gene> genes;
 
+        public Species species { get; set; }
+
         // 
         private Dictionary<Node, List<Gene>> nodeDependencyGraph;
 
         private bool graphIsDirty = true;
 
-        public float fitnessScore { get; set; }
+        public double fitnessScore { get; set; }
 
         public Genome(List<Node> inputNodes, List<Node> outputNodes)
         {
@@ -97,6 +99,7 @@ namespace Neat.Components
             this.outputNodes= outputNodes;
             this.hiddenNodes = new List<Node>();
             fitnessScore = 0;
+            species = null;
         }
 
         // done just for testing

@@ -13,15 +13,15 @@ namespace Neat.Config
 
 		//crossover
 		public double enableDisableFlagProbablity = 75;
-		public double matingCrossoverProportion = 50;
 		//crossover
 
 		//Selection
-		public double populationSruvivalPercentage = 50;
-		public int minimumPopulation = 200;
+		public int populationSruvivalPercentagePerSpecies = 50;
+		public int minimumPopulationPerSpecies = 5;
 		//Selection
 
 		//mutation
+		public int percentageOfGenomesToMutate = 10;
 		public int geneWeightChangeProbability = 40;
 		public int geneMutationProbability = 25;
 		public int nodeMutationProbability = 25;

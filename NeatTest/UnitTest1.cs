@@ -261,6 +261,31 @@ namespace NeatTest
         }
 
         [Test]
+        public void speciesSortingTest()
+        {
+            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
+            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
+            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
+            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
+            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
+            genome2.addNewGene(inputNodes[0], outputNodes[1], -0.1);
+            genome2.addNewGene(inputNodes[1], outputNodes[0], -0.2);
+            genome2.addNewGene(inputNodes[1], outputNodes[1], -0.3);
+            genome2.addNewGene(inputNodes[2], outputNodes[1], -0.4);
+            genome2.addNewGene(inputNodes[2], outputNodes[0], -0.5);
+            genome1.fitnessScore = 10;
+            genome2.fitnessScore = 29;
+            List<Genome> genomes = new List<Genome>();
+            genomes.Add(genome1);
+            genomes.Add(genome2);
+            CompareGenomes compare = new CompareGenomes();
+            genomes.Sort(compare);
+            Assert.AreEqual(genomes[0], genome2);
+            Assert.AreEqual(genomes[1], genome1);
+            Assert.Pass();
+        }
+
+        [Test]
         public void calculateOutputTest()
         {
             genome1.fitnessScore = 4;

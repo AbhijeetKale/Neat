@@ -2,6 +2,8 @@
 using Neat.Config;
 using Neat.Components;
 using Neat.Util;
+using System.Diagnostics.CodeAnalysis;
+
 namespace Neat.Framework
 {
     #region NeatMain
@@ -14,10 +16,8 @@ namespace Neat.Framework
         List<Node> inputNodes;
         List<Node> outputNodes;
         List<Species> speciesCollection;
-        // index of species current blac box containing genome belongs to
-        int currentBlackBoxSpeciesIdx;
-        // index of genome in current blac box wihtin a species
-        int currentBlackBoxIdx;
+        int currentSpeciesIndex = -1;
+        int currentGenomeIndex = -1;
 
         public NeatMain(NeatConfig config, int inputNodeCount, int outputNodeCount, int initPopulationCount) {
             NeatMain.config = config ?? new NeatConfig();
@@ -33,8 +33,6 @@ namespace Neat.Framework
             {
                 outputNodes.Add(new Node(id++, NodeType.OUTPUT));
             }
-            currentBlackBoxIdx = 0;
-            currentBlackBoxSpeciesIdx = 0;
             initPopulation(initPopulationCount);
         }
 
@@ -90,11 +88,86 @@ namespace Neat.Framework
         }
 
         // after the whole population is done, check it's evaluation
-        public void evaluateGeneration()
+        private void evaluateGeneration()
         {
+            int genomeVacancy = 0;
+            foreach(Species s in speciesCollection)
+            {
+                // selection
+                genomeVacancy += s.selection();
+            }
+            List<Genome> allGenomes = new List<Genome>();
+            foreach(Species s in speciesCollection)
+            {
+                for (int i = 0; i < s.populationCount(); i++)
+                {
+                    allGenomes.Add(s.getGenome(i));
+                }
+            }
+            // fill in removed genome spaces with new ones
 
+            //mutation
+            int mutationCount = allGenomes.Count * config.percentageOfGenomesToMutate;
+            for (int i = 0; i < mutationCount; i++)
+            {
+                Genome mutatingGenome = RandomGenerator.getRandomElementFromList<Genome>(allGenomes);
+                Species speciesBeforeMutation = mutatingGenome.species;
+                mutatingGenome.mutateGenome();
+                // if current genome did not have a previous species assigned or is not compatible with
+                // it's previous species, find and add the genome to another species
+                if (speciesBeforeMutation == null ||
+                    !speciesBeforeMutation.checkCompatibility(mutatingGenome))
+                {
+                    speciesBeforeMutation.removeGenome(mutatingGenome);
+                    addToFittingSpeices(mutatingGenome);
+                }
+            }
+
+            // crossover
+            for(int i = 0; i < genomeVacancy; i++)
+            {
+                Genome parent1 = RandomGenerator.getRandomElementFromList<Genome>(allGenomes);
+                Genome parent2 = parent1;
+                // looping until we get a different parent
+                while(parent1 == parent2)
+                {
+                    parent2 = RandomGenerator.getRandomElementFromList(allGenomes);
+                }
+                Genome newGenome = Genome.crossover(parent1, parent2);
+                addToFittingSpeices(newGenome);
+            }
         }
 
+        private void addToFittingSpeices(Genome genome)
+        {
+            bool foundSpecies = false;
+            foreach (Species s in speciesCollection)
+            {
+                if (s.tryAddingGenome(genome))
+                {
+                    foundSpecies = true;
+                    break;
+                }
+            }
+            if (!foundSpecies)
+            {
+                Species s = new Species();
+                s.tryAddingGenome(genome);
+                speciesCollection.Add(s);
+            }
+        }
+
+        public NeatBox getNextNeatBox()
+        {
+            currentSpeciesIndex = (currentSpeciesIndex + 1) % speciesCollection.Count;
+            currentGenomeIndex = (currentGenomeIndex + 1) % speciesCollection[currentSpeciesIndex].populationCount();
+            if (currentSpeciesIndex ==0 && currentGenomeIndex == 0)
+            {
+                evaluateGeneration();
+            }
+            Genome genome = speciesCollection[currentSpeciesIndex].getGenome(currentGenomeIndex);
+            return new NeatBox(genome);
+        }
     }
     #endregion
 
@@ -106,8 +179,28 @@ namespace Neat.Framework
         {
             this.genome = genome;
         }
+
+        public List<double> calculateOutput(List<double> input) =>
+            genome.calculateOutput(input);
+        public void setFitnessScore(double fitness) => genome.fitnessScore = fitness;
+
     }
 
+    public class CompareGenomes : Comparer<Genome>
+    {
+        public override int Compare(Genome x, Genome y)
+        {
+            if (x.fitnessScore > y.fitnessScore)
+            {
+                return -1;
+            }
+            else if (x.fitnessScore < y.fitnessScore)
+            {
+                return 1;
+            }
+            return 0;
+        }
+    }
 
     #region species
     public class Species
@@ -121,6 +214,21 @@ namespace Neat.Framework
         {
             speciesPopulation = new List<Genome>();
             representativeGenome = null;
+        }
+
+        // returns total genomes that have been removed as the selection process
+        public int selection()
+        {
+            int tobeRemoved = speciesPopulation.Count * NeatMain.config.populationSruvivalPercentagePerSpecies / 100;
+            int maxPossibleRemovals = speciesPopulation.Count - NeatMain.config.minimumPopulationPerSpecies;
+            tobeRemoved = tobeRemoved > maxPossibleRemovals ? maxPossibleRemovals : tobeRemoved;
+            speciesPopulation.Sort(new CompareGenomes());
+            if (tobeRemoved > 0)
+            {
+                int idx = speciesPopulation.Count - tobeRemoved;
+                removeGenomeFrom(idx);
+            }
+            return tobeRemoved > 0 ? tobeRemoved : 0;
         }
 
         public int populationCount() => speciesPopulation.Count;
@@ -146,10 +254,16 @@ namespace Neat.Framework
             if (checkCompatibility(genome))
             {
                 speciesPopulation.Add(genome);
+                genome.species = this;
                 setRandomRepresentative();
                 return true;
             }
             return false;
+        }
+
+        public void removeGenome(Genome genome) {
+            genome.species = null;
+            speciesPopulation.Remove(genome);
         }
 
         public void removeGenomeFrom(int fromIndex)
