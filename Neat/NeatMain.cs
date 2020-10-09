@@ -45,7 +45,7 @@ namespace Neat.Framework
                 int minGenesCount = 1;
                 int maxGenesCount = inputNodes.Count * outputNodes.Count;
                 Genome genome = new Genome(inputNodes, outputNodes);
-                int numOfGenes = min(minGenesCount, RandomGenerator.randomNumBefore(maxGenesCount));
+                int numOfGenes = max(minGenesCount, RandomGenerator.randomNumBefore(maxGenesCount));
                 for(int i = 0; i < numOfGenes; i++)
                 {
                     Node from = RandomGenerator.getRandomElementFromList(inputNodes);
@@ -59,7 +59,7 @@ namespace Neat.Framework
                 chooseSpecies(genome);
             }
         }
-        private int min(int a, int b) => a < b ? a : b;
+        private int max(int a, int b) => a > b ? a : b;
 
         // check which species the genome belongs to. Create a new species if does not belong to any
         private void chooseSpecies(Genome genome)

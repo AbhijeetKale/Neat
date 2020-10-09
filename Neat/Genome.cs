@@ -351,7 +351,7 @@ namespace Neat.Components
                 throw new ArgumentException("Number of inputs incorrect");
             }
             int totalCount = inputNodes.Count + outputNodes.Count + hiddenNodes.Count;
-            double[] activationValues = new double[totalCount];
+            double[] activationValues = new double[totalCount + 1];
             for(int i = 0; i < totalCount; i++)
             {
                 activationValues[i] = default;

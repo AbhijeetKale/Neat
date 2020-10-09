@@ -318,6 +318,11 @@ namespace NeatTest
             NeatMain neatAlgo = new NeatMain(new NeatConfig(), 3, 3, initPopulation);
             for(int count = 0; count < no_generations * initPopulation; count++) {
                 NeatBox neatBox = neatAlgo.getNextNeatBox();
+                List<double> randList = new List<double>();
+                randList.Add(RandomGenerator.getRandomDouble());
+                randList.Add(RandomGenerator.getRandomDouble());
+                randList.Add(RandomGenerator.getRandomDouble());
+                neatBox.calculateOutput(randList);
                 neatBox.setFitnessScore(RandomGenerator.getRandomDouble());
             }
             Assert.Pass();
