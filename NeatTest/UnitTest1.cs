@@ -180,6 +180,7 @@ namespace NeatTest
             NeatMain.config.geneWeightChangeProbability = 100;
             NeatMain.config.geneMutationProbability = 0;
             NeatMain.config.nodeMutationProbability = 0;
+            NeatMain.config.disableGeneProbability = 0;
             NeatMain.config.randomWeightMutation = false;
             genome1.mutateGenome();
             // weight mutation of +- weightdelta in config should occur in one gene
@@ -218,6 +219,7 @@ namespace NeatTest
             NeatMain.config.geneWeightChangeProbability = 100;
             NeatMain.config.geneMutationProbability = 0;
             NeatMain.config.nodeMutationProbability = 0;
+            NeatMain.config.disableGeneProbability = 0;
             NeatMain.config.randomWeightMutation = true;
             genome1.mutateGenome();
             // weight mutation of +- weightdelta in config should occur in only one gene

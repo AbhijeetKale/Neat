@@ -9,7 +9,7 @@ namespace Neat.Framework
     #region NeatMain
     public class NeatMain
     {
-        public static NeatConfig config;
+        public static NeatConfig config = new NeatConfig();
 
         protected int innovationNumber = 1;
 
@@ -20,7 +20,7 @@ namespace Neat.Framework
         int currentGenomeIndex = -1;
 
         public NeatMain(NeatConfig config, int inputNodeCount, int outputNodeCount, int initPopulationCount) {
-            NeatMain.config = config ?? new NeatConfig();
+            NeatMain.config = config;
             speciesCollection = new List<Species>();
             inputNodes = new List<Node>();
             int id = 1;
@@ -310,11 +310,11 @@ namespace Neat.Framework
             }
             avgWeightDifference = avgWeightDifference / matchingGenesCount;
             int excessGeneCount = 0;
-            while (i < genome.getGenes().Count)
+            while (i++ < genome.getGenes().Count)
             {
                 excessGeneCount++;
             }
-            while (j < representativeGenome.getGenes().Count)
+            while (j++ < representativeGenome.getGenes().Count)
             {
                 excessGeneCount++;
             }
