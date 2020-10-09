@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Neat.Util;
 using Neat.Framework;
+using System.Linq;
+
 namespace Neat.Components
 {
     public enum NodeType
@@ -81,7 +83,7 @@ namespace Neat.Components
 
         private List<Node> hiddenNodes;
 
-        private List<Gene> genes;
+        private SortedList<int, Gene> genes = new SortedList<int, Gene>();
 
         public Species species { get; set; }
 
@@ -94,7 +96,6 @@ namespace Neat.Components
 
         public Genome(List<Node> inputNodes, List<Node> outputNodes)
         {
-            this.genes = new List<Gene>();
             this.inputNodes = inputNodes;
             this.outputNodes= outputNodes;
             this.hiddenNodes = new List<Node>();
@@ -109,11 +110,13 @@ namespace Neat.Components
             allExistingGenes.Clear();
         }
 
-        public List<Gene> getGenes() => this.genes;
+        public List<Gene> getGenes() => this.genes.Values.ToList<Gene>();
 
         private Genome(List<Gene> genes, List<Node> inputNodes, List<Node> outputNodes)
         {
-            this.genes = genes;
+            foreach(Gene gene in genes) {
+                this.genes.Add(gene.inovationNumber, gene);
+            }
             this.inputNodes = inputNodes;
             this.outputNodes = outputNodes;
         }
@@ -135,29 +138,17 @@ namespace Neat.Components
                 newInovationNumber = allExistingGenes[nodePair];
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 // fetch index of gene where it should be inserted
-                int idx = searchForGenePosition(newGene);
-                if (idx >= this.genes.Count)
-                {
-                    this.genes.Add(newGene);
-                    return true;
-                }
-                // check if gene is already present
-                if (this.genes[idx].inovationNumber == newInovationNumber)
-                {
+                if (this.genes.ContainsKey(newInovationNumber)) {
                     return false;
                 }
-                // largest inovation number in all genome
-                else
-                {
-                    this.genes.Insert(idx, newGene);
-                }
+                this.genes.Add(newInovationNumber, newGene);
             }
             else
             {
                 newInovationNumber = Genome.globalInnovationNumber++;
                 allExistingGenes.Add(nodePair, newInovationNumber);
                 newGene = new Gene(from, to, weight, newInovationNumber);
-                this.genes.Add(newGene);
+                this.genes.Add(newGene.inovationNumber, newGene);
             }
             graphIsDirty = true;
             return true;
@@ -186,17 +177,16 @@ namespace Neat.Components
         {
             if (this.hasGene(inovationNumber))
             {
-                int idx = searchForGenePosition(inovationNumber);
-                this.genes.RemoveAt(idx);
+                this.genes.Remove(inovationNumber);
             }
             graphIsDirty = true;
         }
 
         public Gene getGene(int inovationNumber)
         {
-            if (hasGene(inovationNumber))
-            {
-                return this.genes[searchForGenePosition(inovationNumber)];
+            Gene output;
+            if(this.genes.TryGetValue(inovationNumber, out output)) {
+                return output;
             }
             return null;
         }
@@ -206,55 +196,18 @@ namespace Neat.Components
             return hasGene(gene.inovationNumber);
         }
 
-        public bool hasGene(int inovationNumber)
-        {
-            int idx = searchForGenePosition(inovationNumber);
-            return genes[idx].inovationNumber == inovationNumber;
-        }
-
-        // binary search
-        private int searchForGenePosition(Gene gene)
-        {
-            return searchForGenePosition(gene.inovationNumber);
-        }
-
-        private int searchForGenePosition(int inovationNumber)
-        {
-            int i = 0;
-            int j = this.genes.Count - 1;
-            int mid = j;
-            while (i < j)
-            {
-                mid = i + (j - i) / 2;
-                if (this.genes[mid].inovationNumber > inovationNumber)
-                {
-                    j = mid - 1;
-                }
-                else if (this.genes[mid].inovationNumber < inovationNumber)
-                {
-                    i = mid + 1;
-                }
-                else
-                {
-                    return mid;
-                }
-            }
-            while (mid >= 0 && this.genes[mid].inovationNumber > inovationNumber)
-            {
-                mid--;
-            }
-            return mid + 1;
-        }
-
+        public bool hasGene(int inovationNumber) => this.genes.ContainsKey(inovationNumber);
 
         public static Genome crossover(Genome parent1, Genome parent2)
         {
             int i = 0, j = 0;
             List<Gene> crossoverResult = new List<Gene>();
-            while(i < parent1.genes.Count && j < parent2.genes.Count)
+            List<Gene> genes1 = parent1.getGenes();
+            List<Gene> genes2 = parent2.getGenes();
+            while (i < genes1.Count && j < genes2.Count)
             {
-                Gene gene1 = parent1.genes[i];
-                Gene gene2 = parent2.genes[j];
+                Gene gene1 = genes1[i];
+                Gene gene2 = genes2[j];
                 // matching gene case. Choose a gene at random
                 if (gene1.inovationNumber == gene2.inovationNumber)
                 {
@@ -283,13 +236,13 @@ namespace Neat.Components
                     i++;
                 }
             }
-            while (i < parent1.genes.Count && parent1.fitnessScore >= parent2.fitnessScore)
+            while (i < genes1.Count && parent1.fitnessScore >= parent2.fitnessScore)
             {
-                crossoverResult.Add(parent1.genes[i++]);
+                crossoverResult.Add(genes1[i++]);
             }
-            while (j < parent2.genes.Count && parent2.fitnessScore >= parent1.fitnessScore)
+            while (j < genes2.Count && parent2.fitnessScore >= parent1.fitnessScore)
             {
-                crossoverResult.Add(parent2.genes[j++]);
+                crossoverResult.Add(genes2[j++]);
             }
             return new Genome(crossoverResult, parent1.inputNodes, parent1.outputNodes);
         }
@@ -303,6 +256,7 @@ namespace Neat.Components
                     , MutationType.ADD_NODE, MutationType.TOGGEL_GENE};
             MutationType mutation = RandomGenerator.getElementBasedonProbablity(
                 new List<MutationType>(mutations), mutationProbabiliteis);
+            List<Gene> geneList = getGenes();
             switch(mutation)
             {
                 case MutationType.ADD_GENE:
@@ -334,11 +288,11 @@ namespace Neat.Components
                     mutateRandomGeneWeight();
                     break;
                 case MutationType.ADD_NODE:
-                    Gene gene = RandomGenerator.getRandomElementFromList(this.genes);
+                    Gene gene = RandomGenerator.getRandomElementFromList(geneList);
                     addHiddenNodeBetween(gene);
                     break;
                 case MutationType.TOGGEL_GENE:
-                    Gene r = RandomGenerator.getRandomElementFromList(this.genes);
+                    Gene r = RandomGenerator.getRandomElementFromList(geneList);
                     r.disabled = !r.disabled;
                     break;
             }
@@ -346,7 +300,8 @@ namespace Neat.Components
         }
         private void mutateRandomGeneWeight()
         {
-            Gene g = RandomGenerator.getRandomElementFromList(this.genes);
+            List<Gene> geneList = getGenes();
+            Gene g = RandomGenerator.getRandomElementFromList(geneList);
             if (NeatMain.config.randomWeightMutation)
             {
                 g.weight = RandomGenerator.getRandomDouble();
@@ -379,7 +334,7 @@ namespace Neat.Components
             {
                 nodeDependencyGraph[node] = new List<Gene>();
             }
-            foreach (Gene gene in this.genes)
+            foreach (Gene gene in this.genes.Values)
             {
                 if (!gene.disabled)
                 {

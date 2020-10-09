@@ -1,8 +1,11 @@
 using NUnit.Framework;
 using Neat.Components;
 using Neat.Framework;
+using Neat.Config;
 using System;
 using System.Collections.Generic;
+using Neat.Util;
+
 namespace NeatTest
 {
     public class Tests
@@ -304,6 +307,18 @@ namespace NeatTest
             for(int i = 0; i < output.Count; i++)
             {
                 Assert.AreEqual(result[i], output[i]);
+            }
+            Assert.Pass();
+        }
+
+        [Test]
+        public void MainTest() {
+            int no_generations = 15;
+            int initPopulation = 5;
+            NeatMain neatAlgo = new NeatMain(new NeatConfig(), 3, 3, initPopulation);
+            for(int count = 0; count < no_generations * initPopulation; count++) {
+                NeatBox neatBox = neatAlgo.getNextNeatBox();
+                neatBox.setFitnessScore(RandomGenerator.getRandomDouble());
             }
             Assert.Pass();
         }

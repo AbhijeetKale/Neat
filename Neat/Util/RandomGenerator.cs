@@ -13,6 +13,9 @@ namespace Neat.Util
 
         public static T getRandomElementFromList<T>(List<T> list)
         {
+            if (list.Count == 0) {
+                return default;
+            }
             Random r = new Random();
             int idx = r.Next() % list.Count;
             return list[idx];
