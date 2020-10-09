@@ -10,7 +10,8 @@ namespace Neat.Framework
     public class NeatMain
     {
         public static NeatConfig config = new NeatConfig();
-
+        static int generationNo = 0;
+        static int specimenNo = 1;
         protected int innovationNumber = 1;
 
         List<Node> inputNodes;
@@ -90,6 +91,8 @@ namespace Neat.Framework
         // after the whole population is done, check it's evaluation
         private void evaluateGeneration()
         {
+            generationNo++;
+            specimenNo = 0;
             int genomeVacancy = 0;
             foreach(Species s in speciesCollection)
             {
@@ -159,14 +162,23 @@ namespace Neat.Framework
 
         public NeatBox getNextNeatBox()
         {
-            currentSpeciesIndex = (currentSpeciesIndex + 1) % speciesCollection.Count;
-            currentGenomeIndex = (currentGenomeIndex + 1) % speciesCollection[currentSpeciesIndex].populationCount();
-            if (currentSpeciesIndex ==0 && currentGenomeIndex == 0)
-            {
-                evaluateGeneration();
+            if (currentGenomeIndex == -1 && currentSpeciesIndex == -1) {
+                currentSpeciesIndex = 0;
+                currentGenomeIndex = 0;
+            } else {
+                currentGenomeIndex = (currentGenomeIndex + 1) % speciesCollection[currentSpeciesIndex].populationCount();
+                if (currentGenomeIndex == 0)
+                {
+                    currentSpeciesIndex = (currentSpeciesIndex + 1) % speciesCollection.Count;
+                }
+
+                if (currentSpeciesIndex == 0 && currentGenomeIndex == 0)
+                {
+                    evaluateGeneration();
+                }
             }
             Genome genome = speciesCollection[currentSpeciesIndex].getGenome(currentGenomeIndex);
-            return new NeatBox(genome);
+            return new NeatBox(genome, generationNo, specimenNo++);
         }
     }
     #endregion
@@ -174,10 +186,13 @@ namespace Neat.Framework
     public class NeatBox
     {
         private Genome genome;
-
-        public NeatBox(Genome genome)
+        public int generation;
+        public int specimen;
+        public NeatBox(Genome genome, int gen, int specimen)
         {
             this.genome = genome;
+            this.generation = gen;
+            this.specimen = specimen;
         }
 
         public List<double> calculateOutput(List<double> input) =>
