@@ -110,7 +110,8 @@ namespace Neat.Framework
             // fill in removed genome spaces with new ones
 
             //mutation
-            int mutationCount = allGenomes.Count * config.percentageOfGenomesToMutate;
+            int mutationCount = genomeVacancy * config.percentageOfGenomesToMutate / 100;
+            genomeVacancy -= mutationCount;
             for (int i = 0; i < mutationCount; i++)
             {
                 Genome mutatingGenome = RandomGenerator.getRandomElementFromList<Genome>(allGenomes);
@@ -125,7 +126,7 @@ namespace Neat.Framework
                     addToFittingSpeices(mutatingGenome);
                 }
             }
-
+            
             // crossover
             for(int i = 0; i < genomeVacancy; i++)
             {

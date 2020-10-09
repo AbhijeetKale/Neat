@@ -314,7 +314,7 @@ namespace NeatTest
         [Test]
         public void MainTest() {
             int no_generations = 15;
-            int initPopulation = 5;
+            int initPopulation = 100;
             NeatMain neatAlgo = new NeatMain(new NeatConfig(), 3, 3, initPopulation);
             for(int count = 0; count < no_generations * initPopulation; count++) {
                 NeatBox neatBox = neatAlgo.getNextNeatBox();

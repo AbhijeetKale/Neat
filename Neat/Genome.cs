@@ -96,9 +96,9 @@ namespace Neat.Components
 
         public Genome(List<Node> inputNodes, List<Node> outputNodes)
         {
+            this.hiddenNodes = new List<Node>();
             this.inputNodes = inputNodes;
             this.outputNodes= outputNodes;
-            this.hiddenNodes = new List<Node>();
             fitnessScore = 0;
             species = null;
         }
@@ -117,6 +117,7 @@ namespace Neat.Components
             foreach(Gene gene in genes) {
                 this.genes.Add(gene.inovationNumber, gene);
             }
+            this.hiddenNodes = new List<Node>();
             this.inputNodes = inputNodes;
             this.outputNodes = outputNodes;
         }
