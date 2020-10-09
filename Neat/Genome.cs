@@ -132,7 +132,7 @@ namespace Neat.Components
             int newInovationNumber;
             Gene newGene;
             if (allExistingGenes.ContainsKey(nodePair)) {
-                newInovationNumber = allExistingGenes.GetValueOrDefault(nodePair);
+                newInovationNumber = allExistingGenes[nodePair];
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 // fetch index of gene where it should be inserted
                 int idx = searchForGenePosition(newGene);
