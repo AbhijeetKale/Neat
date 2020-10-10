@@ -85,7 +85,7 @@ namespace Neat.Components
 
         private SortedList<int, Gene> genes = new SortedList<int, Gene>();
 
-        List<String> geneLog = new List<string>();
+        public List<String> geneLog = new List<string>();
 
         public Species species { get; set; }
 

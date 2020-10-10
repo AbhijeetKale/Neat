@@ -316,14 +316,18 @@ namespace NeatTest
             int no_generations = 15;
             int initPopulation = 100;
             NeatMain neatAlgo = new NeatMain(new NeatConfig(), 3, 3, initPopulation);
-            for(int count = 0; count < no_generations * initPopulation; count++) {
-                NeatBox neatBox = neatAlgo.getNextNeatBox();
-                List<double> randList = new List<double>();
-                randList.Add(RandomGenerator.getRandomDouble());
-                randList.Add(RandomGenerator.getRandomDouble());
-                randList.Add(RandomGenerator.getRandomDouble());
-                neatBox.calculateOutput(randList);
-                neatBox.setFitnessScore(RandomGenerator.getRandomDouble());
+            for(int count = 0; count < no_generations; count++) {
+                for(int counter = 0; counter < initPopulation; counter++) {
+                    NeatBox neatBox = neatAlgo.getNextNeatBox();
+                    List<double> randList = new List<double>();
+                    randList.Add(RandomGenerator.getRandomDouble());
+                    randList.Add(RandomGenerator.getRandomDouble());
+                    randList.Add(RandomGenerator.getRandomDouble());
+                    neatBox.calculateOutput(randList);
+                    neatBox.setFitnessScore(RandomGenerator.getRandomDouble());
+                    Assert.AreEqual(counter + 1, neatBox.specimen);
+                    Assert.AreEqual(count, neatBox.generation);
+                }
             }
             Assert.Pass();
         }

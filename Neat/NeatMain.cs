@@ -3,6 +3,7 @@ using Neat.Config;
 using Neat.Components;
 using Neat.Util;
 using System.Diagnostics.CodeAnalysis;
+using System;
 
 namespace Neat.Framework
 {
@@ -92,7 +93,7 @@ namespace Neat.Framework
         private void evaluateGeneration()
         {
             generationNo++;
-            specimenNo = 0;
+            specimenNo = 1;
             int genomeVacancy = 0;
             foreach(Species s in speciesCollection)
             {
@@ -200,6 +201,9 @@ namespace Neat.Framework
             genome.calculateOutput(input);
         public void setFitnessScore(double fitness) => genome.fitnessScore = fitness;
 
+        public List<String> getGenomeLog() {
+            return this.genome.geneLog;
+        }
     }
 
     public class CompareGenomes : Comparer<Genome>
