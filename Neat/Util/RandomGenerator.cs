@@ -4,9 +4,9 @@ namespace Neat.Util
 {
     public static class RandomGenerator
     {
+        private static Random r = new Random();
         public static object chooseAtRandom(object a, object b)
         {
-            Random r = new Random();
             int num = r.Next() % 2;
             return num == 0 ? a : b;
         }
@@ -16,27 +16,23 @@ namespace Neat.Util
             if (list.Count == 0) {
                 return default;
             }
-            Random r = new Random();
             int idx = r.Next() % list.Count;
             return list[idx];
         }
 
         public static int getRandomIndexFromList<T>(List<T> list)
         {
-            Random r = new Random();
             return r.Next() % list.Count;
         }
 
         public static double getRandomDouble()
         {
-            Random r = new Random();
             double k = r.NextDouble();
             return r.Next() % 2 == 0 ? k : -k;
         }
 
         public static int randomNumBefore(int i)
         {
-            Random r = new Random();
             return r.Next() % i;
         }
 
@@ -51,7 +47,6 @@ namespace Neat.Util
             {
                 throw new ArgumentException("Addition of probs has to be 100");
             }
-            Random r = new Random();
             int num = r.Next() % 100;
             sum = 0;
             for(int i = 0; i < elements.Count; i++)

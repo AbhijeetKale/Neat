@@ -4,6 +4,7 @@ using Neat.Components;
 using Neat.Util;
 using System.Diagnostics.CodeAnalysis;
 using System;
+using System.Text;
 
 namespace Neat.Framework
 {
@@ -234,6 +235,21 @@ namespace Neat.Framework
         {
             speciesPopulation = new List<Genome>();
             representativeGenome = null;
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            foreach(Genome genome in this.speciesPopulation) {
+                List<Gene> genes = genome.getGenes();
+                StringBuilder geneSb = new StringBuilder();
+                foreach (Gene gene in genes) {
+                    geneSb.Append(gene.inovationNumber);
+                    geneSb.Append(", ");
+                }
+                sb.Append(geneSb.ToString());
+                sb.Append("\n");
+            }
+            return sb.ToString();
         }
 
         // returns total genomes that have been removed as the selection process
