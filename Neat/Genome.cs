@@ -85,6 +85,8 @@ namespace Neat.Components
 
         private SortedList<int, Gene> genes = new SortedList<int, Gene>();
 
+        List<String> geneLog = new List<string>();
+
         public Species species { get; set; }
 
         // 
@@ -98,9 +100,10 @@ namespace Neat.Components
         {
             this.hiddenNodes = new List<Node>();
             this.inputNodes = inputNodes;
-            this.outputNodes= outputNodes;
+            this.outputNodes = outputNodes;
             fitnessScore = 0;
             species = null;
+            geneLog.Add("Added from public ctor");
         }
 
         // done just for testing
@@ -114,16 +117,31 @@ namespace Neat.Components
 
         private Genome(List<Gene> genes, List<Node> inputNodes, List<Node> outputNodes)
         {
-            foreach(Gene gene in genes) {
-                this.genes.Add(gene.inovationNumber, gene);
-            }
-            this.hiddenNodes = new List<Node>();
             this.inputNodes = inputNodes;
             this.outputNodes = outputNodes;
+            Dictionary<int, Node> hiddenNodesMap = new Dictionary<int, Node>();
+            foreach (Gene gene in genes)
+            {
+                this.genes.Add(gene.inovationNumber, gene);
+                if (!hiddenNodesMap.ContainsKey(gene.from.nodeId) 
+                    && gene.from.nodetype == NodeType.HIDDEN)
+                {
+                    hiddenNodesMap.Add(gene.from.nodeId, gene.from);
+                }
+                if (!hiddenNodesMap.ContainsKey(gene.to.nodeId) 
+                    && gene.to.nodetype == NodeType.HIDDEN)
+                {
+                    hiddenNodesMap.Add(gene.to.nodeId, gene.to);
+                }
+            }
+            this.hiddenNodes = hiddenNodesMap.Values.ToList<Node>();
+            geneLog.Add("Added from private ctor");
         }
 
         public bool addNewGene(Node from, Node to, double weight)
         {
+
+            geneLog.Add("Trying to add Gene to Genome");
             // Gene validations
             if (!((inputNodes.Contains(from) || hiddenNodes.Contains(from))
                 && (hiddenNodes.Contains(to) || outputNodes.Contains(to))))
@@ -140,9 +158,12 @@ namespace Neat.Components
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 // fetch index of gene where it should be inserted
                 if (this.genes.ContainsKey(newInovationNumber)) {
+                    geneLog.Add("Failed to add gene. Gene already exists in Genome");
                     return false;
                 }
                 this.genes.Add(newInovationNumber, newGene);
+                geneLog.Add(
+                "Added existing gene with inovation " + newInovationNumber + " to genome");
             }
             else
             {
@@ -150,6 +171,8 @@ namespace Neat.Components
                 allExistingGenes.Add(nodePair, newInovationNumber);
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 this.genes.Add(newGene.inovationNumber, newGene);
+                geneLog.Add(
+                "Added new gene with inovation " + newInovationNumber + " to genome");
             }
             graphIsDirty = true;
             return true;
@@ -170,6 +193,7 @@ namespace Neat.Components
             this.removeGene(gene.inovationNumber);
             this.addNewGene(gene.from, newNode, 1.0);
             this.addNewGene(newNode, gene.to, gene.weight);
+            geneLog.Add("Added new node: " + newNode.nodeId );
             graphIsDirty = true;
             return newNode;
         }
@@ -179,8 +203,9 @@ namespace Neat.Components
             if (this.hasGene(inovationNumber))
             {
                 this.genes.Remove(inovationNumber);
+                geneLog.Add("Removed Gene " + inovationNumber + " from geneome");
+                graphIsDirty = true;
             }
-            graphIsDirty = true;
         }
 
         public Gene getGene(int inovationNumber)
@@ -258,7 +283,8 @@ namespace Neat.Components
             MutationType mutation = RandomGenerator.getElementBasedonProbablity(
                 new List<MutationType>(mutations), mutationProbabiliteis);
             List<Gene> geneList = getGenes();
-            switch(mutation)
+            geneLog.Add("Mutating Genome: " + mutation);
+            switch (mutation)
             {
                 case MutationType.ADD_GENE:
                     List<Node> possibleFromNodes = new List<Node>();
@@ -315,6 +341,7 @@ namespace Neat.Components
             g.weight = max(NeatMain.config.minWeight, min(NeatMain.config.maxWeight, g.weight));
             // sometimes double arithemetic screws up. So rounding off:
             g.weight = Math.Round(g.weight, 4);
+            geneLog.Add("Mutating Gene" + g.inovationNumber + "Genome weight to " + g.weight);
         }
         private double min(double a, double b) => a < b ? a : b;
 
@@ -322,6 +349,7 @@ namespace Neat.Components
 
         private void calcNodeDependencyGraph()
         {
+            geneLog.Add("Calculating Dependency Graph");
             this.nodeDependencyGraph = new Dictionary<Node, List<Gene>>();
             foreach(Node node in inputNodes)
             {
@@ -347,6 +375,7 @@ namespace Neat.Components
 
         public List<double> calculateOutput(List<double> inputs)
         {
+            geneLog.Add("Calculating output");
             if (inputs.Count != inputNodes.Count)
             {
                 throw new ArgumentException("Number of inputs incorrect");
