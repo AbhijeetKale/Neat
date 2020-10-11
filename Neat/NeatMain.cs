@@ -77,10 +77,17 @@ namespace Neat.Framework
             generationNo++;
             specimenNo = 1;
             int genomeVacancy = 0;
-            foreach (Species s in speciesCollection)
+            for (int i = 0; i < speciesCollection.Count; i++)
             {
+                Species s = speciesCollection[i];
                 // selection
-                genomeVacancy += s.selection();
+                int k = s.evaluateSpecies();
+                if (k == -1) {
+                    // remove species
+                    speciesCollection.RemoveAt(i);
+                } else {
+                    genomeVacancy += k;
+                }
             }
             List<Genome> allGenomes = new List<Genome>();
             foreach (Species s in speciesCollection)
@@ -238,9 +245,15 @@ namespace Neat.Framework
             }
             return sb.ToString();
         }
+        // function returns number of genomes removed
+        // function returns -1 if species is to be deleted
+        public int evaluateSpecies() {
+            // TODO(abhijeet): evaluate species performance
+            return selection();
+        }
 
         // returns total genomes that have been removed as the selection process
-        public int selection()
+        private int selection()
         {
             int tobeRemoved = speciesPopulation.Count * NeatMain.config.populationSruvivalPercentagePerSpecies / 100;
             int maxPossibleRemovals = speciesPopulation.Count - NeatMain.config.minimumPopulationPerSpecies;
