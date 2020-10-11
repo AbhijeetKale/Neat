@@ -215,15 +215,15 @@ namespace Neat.Framework
     public class Species
     {
         private List<Genome> speciesPopulation;
-
-        public readonly int genesisGeneration;
+        // update this whenever the species is evaluated
+        private int lastGenOfSpeciesEval;
 
         // a radndomly chosen specimen to compare other sample genomes with
         private Genome representativeGenome = null;
 
         public Species(int generationNo)
         {
-            genesisGeneration = generationNo;
+            lastGenOfSpeciesEval = generationNo;
             speciesPopulation = new List<Genome>();
             representativeGenome = null;
         }
@@ -244,7 +244,7 @@ namespace Neat.Framework
                 sb.Append("\n");
             }
             return sb.ToString();
-        }
+        }// Species evaluation when 1 gen is completed
         // function returns number of genomes removed
         // function returns -1 if species is to be deleted
         public int evaluateSpecies() {
