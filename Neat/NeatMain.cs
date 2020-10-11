@@ -2,7 +2,6 @@
 using Neat.Config;
 using Neat.Components;
 using Neat.Util;
-using System.Diagnostics.CodeAnalysis;
 using System;
 using System.Text;
 
@@ -22,7 +21,8 @@ namespace Neat.Framework
         int currentSpeciesIndex = -1;
         int currentGenomeIndex = -1;
 
-        public NeatMain(NeatConfig config, int inputNodeCount, int outputNodeCount, int initPopulationCount) {
+        public NeatMain(NeatConfig config, int inputNodeCount, int outputNodeCount, int initPopulationCount)
+        {
             NeatMain.config = config;
             speciesCollection = new List<Species>();
             inputNodes = new List<Node>();
@@ -42,14 +42,14 @@ namespace Neat.Framework
         private void initPopulation(int initPopulationCount)
         {
             // Initializing a species
-            speciesCollection.Add(new Species());
-            for(int count = 0; count < initPopulationCount; count++)
+            speciesCollection.Add(new Species(0));
+            for (int count = 0; count < initPopulationCount; count++)
             {
                 int minGenesCount = 1;
                 int maxGenesCount = inputNodes.Count * outputNodes.Count;
                 Genome genome = new Genome(inputNodes, outputNodes);
                 int numOfGenes = max(minGenesCount, RandomGenerator.randomNumBefore(maxGenesCount));
-                for(int i = 0; i < numOfGenes; i++)
+                for (int i = 0; i < numOfGenes; i++)
                 {
                     Node from = RandomGenerator.getRandomElementFromList(inputNodes);
                     Node to = RandomGenerator.getRandomElementFromList(outputNodes);
@@ -59,29 +59,10 @@ namespace Neat.Framework
                     // our purpose is to randomly initialize genomes
                     genome.addNewGene(from, to, weight);
                 }
-                chooseSpecies(genome);
+                addToFittingSpeices(genome);
             }
         }
         private int max(int a, int b) => a > b ? a : b;
-
-        // check which species the genome belongs to. Create a new species if does not belong to any
-        private void chooseSpecies(Genome genome)
-        {
-            bool belongs = false;
-            foreach (Species species in speciesCollection)
-            {
-                if (species.tryAddingGenome(genome)) {
-                    belongs = true;
-                    break;
-                }
-            }
-            if (!belongs)
-            {
-                Species newSpecies = new Species();
-                newSpecies.tryAddingGenome(genome);
-                speciesCollection.Add(newSpecies);
-            }
-        }
 
         // reset all static things
         public void reset()
@@ -96,13 +77,13 @@ namespace Neat.Framework
             generationNo++;
             specimenNo = 1;
             int genomeVacancy = 0;
-            foreach(Species s in speciesCollection)
+            foreach (Species s in speciesCollection)
             {
                 // selection
                 genomeVacancy += s.selection();
             }
             List<Genome> allGenomes = new List<Genome>();
-            foreach(Species s in speciesCollection)
+            foreach (Species s in speciesCollection)
             {
                 for (int i = 0; i < s.populationCount(); i++)
                 {
@@ -128,14 +109,14 @@ namespace Neat.Framework
                     addToFittingSpeices(mutatingGenome);
                 }
             }
-            
+
             // crossover
-            for(int i = 0; i < genomeVacancy; i++)
+            for (int i = 0; i < genomeVacancy; i++)
             {
                 Genome parent1 = RandomGenerator.getRandomElementFromList<Genome>(allGenomes);
                 Genome parent2 = parent1;
                 // looping until we get a different parent
-                while(parent1 == parent2)
+                while (parent1 == parent2)
                 {
                     parent2 = RandomGenerator.getRandomElementFromList(allGenomes);
                 }
@@ -143,32 +124,31 @@ namespace Neat.Framework
                 addToFittingSpeices(newGenome);
             }
         }
-
+        // check which species the genome belongs to. Create a new species if does not belong to any
         private void addToFittingSpeices(Genome genome)
         {
-            bool foundSpecies = false;
             foreach (Species s in speciesCollection)
             {
                 if (s.tryAddingGenome(genome))
                 {
-                    foundSpecies = true;
-                    break;
+                    return;
                 }
             }
-            if (!foundSpecies)
-            {
-                Species s = new Species();
-                s.tryAddingGenome(genome);
-                speciesCollection.Add(s);
-            }
+            // if no fitting species found create new
+            Species newSpecies = new Species(generationNo);
+            newSpecies.tryAddingGenome(genome);
+            speciesCollection.Add(newSpecies);
         }
 
         public NeatBox getNextNeatBox()
         {
-            if (currentGenomeIndex == -1 && currentSpeciesIndex == -1) {
+            if (currentGenomeIndex == -1 && currentSpeciesIndex == -1)
+            {
                 currentSpeciesIndex = 0;
                 currentGenomeIndex = 0;
-            } else {
+            }
+            else
+            {
                 currentGenomeIndex = (currentGenomeIndex + 1) % speciesCollection[currentSpeciesIndex].populationCount();
                 if (currentGenomeIndex == 0)
                 {
@@ -202,7 +182,8 @@ namespace Neat.Framework
             genome.calculateOutput(input);
         public void setFitnessScore(double fitness) => genome.fitnessScore = fitness;
 
-        public List<String> getGenomeLog() {
+        public List<String> getGenomeLog()
+        {
             return this.genome.geneLog;
         }
     }
@@ -228,21 +209,27 @@ namespace Neat.Framework
     {
         private List<Genome> speciesPopulation;
 
+        public readonly int genesisGeneration;
+
         // a radndomly chosen specimen to compare other sample genomes with
         private Genome representativeGenome = null;
 
-        public Species()
+        public Species(int generationNo)
         {
+            genesisGeneration = generationNo;
             speciesPopulation = new List<Genome>();
             representativeGenome = null;
         }
 
-        public String toString() {
+        public String toString()
+        {
             StringBuilder sb = new StringBuilder();
-            foreach(Genome genome in this.speciesPopulation) {
+            foreach (Genome genome in this.speciesPopulation)
+            {
                 List<Gene> genes = genome.getGenes();
                 StringBuilder geneSb = new StringBuilder();
-                foreach (Gene gene in genes) {
+                foreach (Gene gene in genes)
+                {
                     geneSb.Append(gene.inovationNumber);
                     geneSb.Append(", ");
                 }
@@ -258,9 +245,9 @@ namespace Neat.Framework
             int tobeRemoved = speciesPopulation.Count * NeatMain.config.populationSruvivalPercentagePerSpecies / 100;
             int maxPossibleRemovals = speciesPopulation.Count - NeatMain.config.minimumPopulationPerSpecies;
             tobeRemoved = tobeRemoved > maxPossibleRemovals ? maxPossibleRemovals : tobeRemoved;
-            speciesPopulation.Sort(new CompareGenomes());
             if (tobeRemoved > 0)
             {
+                speciesPopulation.Sort(new CompareGenomes());
                 int idx = speciesPopulation.Count - tobeRemoved;
                 removeGenomeFrom(idx);
             }
@@ -297,7 +284,8 @@ namespace Neat.Framework
             return false;
         }
 
-        public void removeGenome(Genome genome) {
+        public void removeGenome(Genome genome)
+        {
             genome.species = null;
             speciesPopulation.Remove(genome);
         }

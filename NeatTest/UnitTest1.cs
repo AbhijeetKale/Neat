@@ -254,7 +254,7 @@ namespace NeatTest
             genome2.addNewGene(inputNodes[1], outputNodes[1], -0.3);
             genome2.addNewGene(inputNodes[2], outputNodes[1], -0.4);
             genome2.addNewGene(inputNodes[2], outputNodes[0], -0.5);
-            Species species = new Species();
+            Species species = new Species(0);
             if(!species.tryAddingGenome(genome1))
             {
                 Assert.Fail();
