@@ -12,7 +12,6 @@ namespace Neat.Framework
     {
         public static NeatConfig config = new NeatConfig();
         static int generationNo = 0;
-        static int specimenNo = 1;
         protected int innovationNumber = 1;
 
         List<Node> inputNodes;
@@ -75,7 +74,6 @@ namespace Neat.Framework
         private void evaluateGeneration()
         {
             generationNo++;
-            specimenNo = 1;
             int genomeVacancy = 0;
             for (int i = 0; i < speciesCollection.Count; i++)
             {
@@ -169,7 +167,7 @@ namespace Neat.Framework
                 }
             }
             Genome genome = speciesCollection[currentSpeciesIndex].getGenome(currentGenomeIndex);
-            return new NeatBox(genome, generationNo, specimenNo++);
+            return new NeatBox(genome, generationNo, currentSpeciesIndex, currentGenomeIndex);
         }
     }
     #endregion
@@ -179,11 +177,13 @@ namespace Neat.Framework
         private Genome genome;
         public int generation;
         public int specimen;
-        public NeatBox(Genome genome, int gen, int specimen)
+        public int species;
+        public NeatBox(Genome genome, int gen, int species, int specimen)
         {
             this.genome = genome;
             this.generation = gen;
             this.specimen = specimen;
+            this.species = species;
         }
 
         public List<double> calculateOutput(List<double> input) =>
@@ -248,9 +248,10 @@ namespace Neat.Framework
                 sb.Append("\n");
             }
             return sb.ToString();
-        }// Species evaluation when 1 gen is completed
-        // function returns number of genomes removed
-        // function returns -1 if species is to be deleted
+        }
+        // Species evaluation when one generation is completed
+        // function returns number of genomes removed function
+        // returns -1 if species is to be deleted
         public int evaluateSpecies(int currentGen) {
             // if best score of species is less than pervious evaluation's score delete species
             if (lastGenOfSpeciesEval - currentGen > NeatMain.config.numOfGenForSpeciesEval) {
@@ -261,6 +262,8 @@ namespace Neat.Framework
                 bestFitnessScoreofLastEval = currentBestScore;
                 this.lastGenOfSpeciesEval = currentGen;
             }
+            // TODO (abhijeet): Figure out a way to increase population above min
+            //  species population.
             return selection();
         }
 
@@ -340,10 +343,12 @@ namespace Neat.Framework
             int matchingGenesCount = 0;
             int disjointGenes = 0;
             double avgWeightDifference = 0;
-            while (i < genome.getGenes().Count && j < representativeGenome.getGenes().Count)
+            List<Gene> genomeGenes = genome.getGenes();
+            List<Gene> repGenes = representativeGenome.getGenes();
+            while (i < genomeGenes.Count && j < repGenes.Count)
             {
-                Gene gene1 = genome.getGenes()[i];
-                Gene gene2 = representativeGenome.getGenes()[j];
+                Gene gene1 = genomeGenes[i];
+                Gene gene2 = repGenes[j];
                 // matching gene case. Choose a gene at random
                 if (gene1.inovationNumber == gene2.inovationNumber)
                 {
@@ -367,21 +372,24 @@ namespace Neat.Framework
             }
             avgWeightDifference = avgWeightDifference / matchingGenesCount;
             int excessGeneCount = 0;
-            while (i++ < genome.getGenes().Count)
+            while (i++ < genomeGenes.Count)
             {
                 excessGeneCount++;
             }
-            while (j++ < representativeGenome.getGenes().Count)
+            while (j++ < repGenes.Count)
             {
                 excessGeneCount++;
             }
-            double delta = NeatMain.config.delta_C1 * (double)excessGeneCount + NeatMain.config.delta_C2 * (double)disjointGenes;
-            if (this.speciesPopulation.Count > NeatMain.config.population_Normalization_Threshold)
+            double delta = NeatMain.config.delta_C1 * (double)excessGeneCount 
+                            + NeatMain.config.delta_C2 * (double)disjointGenes;
+            int maxGeneCount = repGenes.Count > genomeGenes.Count 
+                                ? repGenes.Count : genomeGenes.Count;
+            if (maxGeneCount > NeatMain.config.gene_Normalization_Threshold)
             {
-                delta = delta / this.speciesPopulation.Count;
+                delta = delta / maxGeneCount;
             }
             delta += NeatMain.config.delta_C3 * avgWeightDifference;
-            return delta > NeatMain.config.delta_Threshhold ? false : true;
+            return delta >= NeatMain.config.delta_Threshhold ? false : true;
         }
         private double abs(double a) => a < 0 ? -a : a;
     }

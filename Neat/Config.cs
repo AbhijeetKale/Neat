@@ -4,11 +4,14 @@ namespace Neat.Config
     public class NeatConfig
     {
 		//speciation
-		public double delta_Threshhold = 4.0;
-		public double delta_C1 = 0.7;
-		public double delta_C2 = 0.6;
-		public double delta_C3 = 0.2;
-		public int population_Normalization_Threshold = 20;
+		public double delta_Threshhold = 0.75;
+		// eexcess genes weight
+		public double delta_C1 = 1.0;
+		// disjoint genes weight
+		public double delta_C2 = 0.5;
+		// avg weight diff weight
+		public double delta_C3 = 0;
+		public int gene_Normalization_Threshold = 1;
 		public int numOfGenForSpeciesEval = 7;
 		//speciation
 
