@@ -215,6 +215,8 @@ namespace Neat.Framework
     #region species
     public class Species
     {
+        // implement collection of genomes as help, will reduce sort time and
+        // reduce fetching best score genome
         private List<Genome> speciesPopulation;
         // update this whenever the species is evaluated
         private int lastGenOfSpeciesEval;

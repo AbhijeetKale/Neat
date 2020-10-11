@@ -3,8 +3,4 @@
   <PropertyGroup>
 <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="Util\" />
-  </ItemGroup>
 </Project>
