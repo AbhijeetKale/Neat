@@ -81,9 +81,10 @@ namespace Neat.Framework
             {
                 Species s = speciesCollection[i];
                 // selection
-                int k = s.evaluateSpecies();
+                int k = s.evaluateSpecies(generationNo);
                 if (k == -1) {
                     // remove species
+                    genomeVacancy += s.populationCount();
                     speciesCollection.RemoveAt(i);
                 } else {
                     genomeVacancy += k;
@@ -217,7 +218,8 @@ namespace Neat.Framework
         private List<Genome> speciesPopulation;
         // update this whenever the species is evaluated
         private int lastGenOfSpeciesEval;
-
+        // best score when last species eval happened
+        private double bestFitnessScoreofLastEval;
         // a radndomly chosen specimen to compare other sample genomes with
         private Genome representativeGenome = null;
 
@@ -247,9 +249,25 @@ namespace Neat.Framework
         }// Species evaluation when 1 gen is completed
         // function returns number of genomes removed
         // function returns -1 if species is to be deleted
-        public int evaluateSpecies() {
-            // TODO(abhijeet): evaluate species performance
+        public int evaluateSpecies(int currentGen) {
+            // if best score of species is less than pervious evaluation's score delete species
+            if (lastGenOfSpeciesEval - currentGen > NeatMain.config.numOfGenForSpeciesEval) {
+                double currentBestScore = getMaxScoreInSpeices();
+                if (currentBestScore < bestFitnessScoreofLastEval) {
+                    return -1;
+                }
+                bestFitnessScoreofLastEval = currentBestScore;
+                this.lastGenOfSpeciesEval = currentGen;
+            }
             return selection();
+        }
+
+        private double getMaxScoreInSpeices() {
+            double max = 0;
+            foreach(Genome g in speciesPopulation) {
+                max = max < g.fitnessScore ? g.fitnessScore : max;
+            }
+            return max;
         }
 
         // returns total genomes that have been removed as the selection process

@@ -9,6 +9,7 @@ namespace Neat.Config
 		public double delta_C2 = 0.6;
 		public double delta_C3 = 0.2;
 		public int population_Normalization_Threshold = 20;
+		public int numOfGenForSpeciesEval = 7;
 		//speciation
 
 		//crossover
