@@ -16,7 +16,7 @@ namespace NeatTest
         Genome genome2;
         List<Node> inputNodes;
         List<Node> outputNodes;
-        int intputNodeCount = 5;
+        int inputNodeCount = 5;
         int outputNodeCount = 2;
 
         [SetUp]
@@ -35,7 +35,7 @@ namespace NeatTest
         private List<Node> getInputNodeSets()
         {
             List<Node> nodes = new List<Node>();
-            for (int count = 0; count < intputNodeCount; count++) {
+            for (int count = 0; count < inputNodeCount; count++) {
                 nodes.Add(new Node(count, NodeType.INPUT));
             }
             return nodes;
@@ -44,7 +44,8 @@ namespace NeatTest
         private List<Node> getOutputNodeSets()
         {
             List<Node> nodes = new List<Node>();
-            for (int count = intputNodeCount; count < outputNodeCount; count++)
+            for (int count = inputNodeCount;
+            count < inputNodeCount + outputNodeCount; count++)
             {
                 nodes.Add(new Node(count, NodeType.OUTPUT));
             }
