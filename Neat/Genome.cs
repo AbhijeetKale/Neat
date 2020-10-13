@@ -33,10 +33,7 @@ namespace Neat.Components
             this.nodetype = nodeType;
         }
 
-        public object Clone()
-        {
-            return new Node(this.nodeId, this.nodetype);
-        }
+        public object Clone() => new Node(this.nodeId, this.nodetype);
 
         public override bool Equals(object node)
         {
@@ -50,14 +47,14 @@ namespace Neat.Components
         }
     }
 
-    public class Gene: ICloneable
+    public class Gene : ICloneable
     {
         public Node from { get; }
         public Node to { get; }
         public double weight { get; set; }
         public int inovationNumber { get; }
         // can be disabled
-        public bool disabled { get;  set; }
+        public bool disabled { get; set; }
 
         public Gene(Node from, Node to, double weight, int inovationNumber)
         {
@@ -67,11 +64,14 @@ namespace Neat.Components
             this.disabled = false;
             this.inovationNumber = inovationNumber;
         }
-
-        public object Clone() => new Gene(from, to, weight, inovationNumber);
+        public object Clone() { 
+            Gene g = new Gene(from, to, weight, inovationNumber);
+            g.disabled = this.disabled;
+            return g;
+        }
     }
 
-    public class Genome
+    public class Genome : ICloneable
     {
         //from node -> to Node to inovationNumber
         static Dictionary<KeyValuePair<Node, Node>, int> allExistingGenes
@@ -116,20 +116,21 @@ namespace Neat.Components
 
         public List<Gene> getGenes() => this.genes.Values.ToList<Gene>();
 
-        private Genome(List<Gene> genes, List<Node> inputNodes, List<Node> outputNodes)
+        private Genome(List<Gene> genesToClone, List<Node> inputNodes, List<Node> outputNodes)
         {
             this.inputNodes = inputNodes;
             this.outputNodes = outputNodes;
             Dictionary<int, Node> hiddenNodesMap = new Dictionary<int, Node>();
-            foreach (Gene gene in genes)
+            foreach (Gene g in genesToClone)
             {
+                Gene gene = (Gene)g.Clone();
                 this.genes.Add(gene.inovationNumber, gene);
-                if (!hiddenNodesMap.ContainsKey(gene.from.nodeId) 
+                if (!hiddenNodesMap.ContainsKey(gene.from.nodeId)
                     && gene.from.nodetype == NodeType.HIDDEN)
                 {
                     hiddenNodesMap.Add(gene.from.nodeId, gene.from);
                 }
-                if (!hiddenNodesMap.ContainsKey(gene.to.nodeId) 
+                if (!hiddenNodesMap.ContainsKey(gene.to.nodeId)
                     && gene.to.nodetype == NodeType.HIDDEN)
                 {
                     hiddenNodesMap.Add(gene.to.nodeId, gene.to);
@@ -154,11 +155,13 @@ namespace Neat.Components
 
             int newInovationNumber;
             Gene newGene;
-            if (allExistingGenes.ContainsKey(nodePair)) {
+            if (allExistingGenes.ContainsKey(nodePair))
+            {
                 newInovationNumber = allExistingGenes[nodePair];
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 // fetch index of gene where it should be inserted
-                if (this.genes.ContainsKey(newInovationNumber)) {
+                if (this.genes.ContainsKey(newInovationNumber))
+                {
                     geneLog.Add("Failed to add gene. Gene already exists in Genome");
                     return false;
                 }
@@ -179,11 +182,12 @@ namespace Neat.Components
             return true;
         }
 
-        public Node addHiddenNodeBetween(Gene gene) {
+        public Node addHiddenNodeBetween(Gene gene)
+        {
             // create node id based on the number of nodes that have been created for this structure
             // If any duplicate mutation occurs within the same generation, this will help kekep track
             // and not create a new inovation number for the duplication
-            if(!this.hasGene(gene))
+            if (!this.hasGene(gene))
             {
                 throw new ArgumentException("Gene passed is not present in Genome");
             }
@@ -194,7 +198,7 @@ namespace Neat.Components
             this.removeGene(gene.inovationNumber);
             this.addNewGene(gene.from, newNode, 1.0);
             this.addNewGene(newNode, gene.to, gene.weight);
-            geneLog.Add("Added new node: " + newNode.nodeId );
+            geneLog.Add("Added new node: " + newNode.nodeId);
             graphIsDirty = true;
             return newNode;
         }
@@ -212,7 +216,8 @@ namespace Neat.Components
         public Gene getGene(int inovationNumber)
         {
             Gene output;
-            if(this.genes.TryGetValue(inovationNumber, out output)) {
+            if (this.genes.TryGetValue(inovationNumber, out output))
+            {
                 return output;
             }
             return null;
@@ -238,7 +243,7 @@ namespace Neat.Components
                 // matching gene case. Choose a gene at random
                 if (gene1.inovationNumber == gene2.inovationNumber)
                 {
-                    crossoverResult.Add((Gene) RandomGenerator.chooseAtRandom(gene1, gene2));
+                    crossoverResult.Add((Gene)RandomGenerator.chooseAtRandom(gene1, gene2));
                     i++;
                     j++;
                 }
@@ -306,7 +311,7 @@ namespace Neat.Components
                     Node from = RandomGenerator.getRandomElementFromList<Node>(possibleFromNodes);
                     Node to = RandomGenerator.getRandomElementFromList<Node>(possibleToNodes);
                     double weight = RandomGenerator.getRandomDouble();
-                    if(!this.addNewGene(from, to, weight))
+                    if (!this.addNewGene(from, to, weight))
                     {
                         // if gene to be added is already present, change weight
                         mutateRandomGeneWeight();
@@ -352,11 +357,11 @@ namespace Neat.Components
         {
             geneLog.Add("Calculating Dependency Graph");
             this.nodeDependencyGraph = new Dictionary<Node, List<Gene>>();
-            foreach(Node node in inputNodes)
+            foreach (Node node in inputNodes)
             {
                 nodeDependencyGraph[node] = new List<Gene>();
             }
-            foreach(Node node in hiddenNodes)
+            foreach (Node node in hiddenNodes)
             {
                 nodeDependencyGraph[node] = new List<Gene>();
             }
@@ -383,11 +388,11 @@ namespace Neat.Components
             }
             int totalCount = inputNodes.Count + outputNodes.Count + hiddenNodes.Count;
             double[] activationValues = new double[totalCount + 1];
-            for(int i = 0; i < totalCount; i++)
+            for (int i = 0; i < totalCount; i++)
             {
                 activationValues[i] = default;
             }
-            for(int i = 0; i < inputs.Count; i++)
+            for (int i = 0; i < inputs.Count; i++)
             {
                 activationValues[inputNodes[i].nodeId] = inputs[i];
             }
@@ -396,7 +401,7 @@ namespace Neat.Components
             {
                 calcNodeDependencyGraph();
             }
-            foreach(Node node in outputNodes)
+            foreach (Node node in outputNodes)
             {
                 setActivationValue(activationValues, node);
                 output.Add(Math.Round(activationValues[node.nodeId], 4));
@@ -407,7 +412,7 @@ namespace Neat.Components
         private void setActivationValue(double[] activationValues, Node node)
         {
             activationValues[node.nodeId] = 0;
-            foreach(Gene gene in nodeDependencyGraph[node])
+            foreach (Gene gene in nodeDependencyGraph[node])
             {
                 if (activationValues[gene.from.nodeId] == default)
                 {
@@ -416,6 +421,16 @@ namespace Neat.Components
                 activationValues[node.nodeId] +=
                     gene.weight * activationValues[gene.from.nodeId];
             }
+        }
+
+        public object Clone()
+        {
+            Genome genome = new Genome(this.getGenes(), inputNodes, outputNodes);
+            genome.fitnessScore = this.fitnessScore;
+            genome.geneLog.Add("Cloned Genome");
+            genome.graphIsDirty = true;
+            genome.species = this.species;
+            return genome;
         }
     }
 }

@@ -102,7 +102,8 @@ namespace Neat.Framework
             genomeVacancy -= mutationCount;
             for (int i = 0; i < mutationCount; i++)
             {
-                Genome mutatingGenome = RandomGenerator.getRandomElementFromList<Genome>(allGenomes);
+                Genome mutatingGenome = (Genome) RandomGenerator
+                    .getRandomElementFromList<Genome>(allGenomes).Clone();
                 Species speciesBeforeMutation = mutatingGenome.species;
                 mutatingGenome.mutateGenome();
                 // if current genome did not have a previous species assigned or is not compatible with
@@ -110,7 +111,6 @@ namespace Neat.Framework
                 if (speciesBeforeMutation == null ||
                     !speciesBeforeMutation.checkCompatibility(mutatingGenome))
                 {
-                    speciesBeforeMutation.removeGenome(mutatingGenome);
                     addToFittingSpeices(mutatingGenome);
                 }
             }
