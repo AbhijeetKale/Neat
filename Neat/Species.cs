@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Neat.Components;
 using Neat.Framework;
+using Neat.Util;
 
 namespace Neat.Collection
 {
