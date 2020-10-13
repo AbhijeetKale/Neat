@@ -14,6 +14,8 @@ namespace NeatTest
         Genome genome2;
         List<Node> inputNodes;
         List<Node> outputNodes;
+        int intputNodeCount = 5;
+        int outputNodeCount = 2;
 
         [SetUp]
         public void Setup()
@@ -30,21 +32,22 @@ namespace NeatTest
         }
         private List<Node> getInputNodeSets()
         {
-            Node[] nodes = new Node[5];
-            nodes[0] = new Node(0, NodeType.INPUT);
-            nodes[1] = new Node(1, NodeType.INPUT);
-            nodes[2] = new Node(2, NodeType.INPUT);
-            nodes[3] = new Node(3, NodeType.INPUT);
-            nodes[4] = new Node(4, NodeType.INPUT);
-            return new List<Node>(nodes);
+            List<Node> nodes = new List<Node>();
+            for (int count = 0; count < intputNodeCount; count++)
+            {
+                nodes.Add(new Node(count, NodeType.INPUT));
+            }
+            return nodes;
         }
 
         private List<Node> getOutputNodeSets()
         {
-            Node[] nodes = new Node[2];
-            nodes[0] = new Node(5, NodeType.OUTPUT);
-            nodes[1] = new Node(6, NodeType.OUTPUT);
-            return new List<Node>(nodes);
+            List<Node> nodes = new List<Node>();
+            for (int count = intputNodeCount; count < outputNodeCount; count++)
+            {
+                nodes.Add(new Node(count, NodeType.OUTPUT));
+            }
+            return nodes;
         }
 
 
@@ -242,55 +245,6 @@ namespace NeatTest
         }
 
         [Test]
-        public void speciesTest()
-        {
-            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
-            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
-            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
-            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
-            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
-            genome2.addNewGene(inputNodes[0], outputNodes[1], -0.1);
-            genome2.addNewGene(inputNodes[1], outputNodes[0], -0.2);
-            genome2.addNewGene(inputNodes[1], outputNodes[1], -0.3);
-            genome2.addNewGene(inputNodes[2], outputNodes[1], -0.4);
-            genome2.addNewGene(inputNodes[2], outputNodes[0], -0.5);
-            Species species = new Species(0);
-            if(!species.tryAddingGenome(genome1))
-            {
-                Assert.Fail();
-                return;
-            }
-            bool check = species.checkCompatibility(genome2);
-            Assert.AreEqual(check, true);
-            Assert.Pass();
-        }
-
-        [Test]
-        public void speciesSortingTest()
-        {
-            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
-            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
-            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
-            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
-            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
-            genome2.addNewGene(inputNodes[0], outputNodes[1], -0.1);
-            genome2.addNewGene(inputNodes[1], outputNodes[0], -0.2);
-            genome2.addNewGene(inputNodes[1], outputNodes[1], -0.3);
-            genome2.addNewGene(inputNodes[2], outputNodes[1], -0.4);
-            genome2.addNewGene(inputNodes[2], outputNodes[0], -0.5);
-            genome1.fitnessScore = 10;
-            genome2.fitnessScore = 29;
-            List<Genome> genomes = new List<Genome>();
-            genomes.Add(genome1);
-            genomes.Add(genome2);
-            CompareGenomes compare = new CompareGenomes();
-            genomes.Sort(compare);
-            Assert.AreEqual(genomes[0], genome2);
-            Assert.AreEqual(genomes[1], genome1);
-            Assert.Pass();
-        }
-
-        [Test]
         public void calculateOutputTest()
         {
             genome1.fitnessScore = 4;
@@ -330,7 +284,6 @@ namespace NeatTest
             }
             Assert.Pass();
         }
-
         void printGenome(Genome genome)
         {
             foreach(Gene gene in genome.getGenes())
