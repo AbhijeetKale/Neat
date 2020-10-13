@@ -271,7 +271,9 @@ namespace NeatTest
             int no_generations = 15;
             int inputCount = 5;
             int initPopulation = 25;
-            NeatMain neatAlgo = new NeatMain(new NeatConfig(), inputCount, 3, initPopulation);
+            NeatConfig config = new NeatConfig();
+            config.populationSruvivalPercentagePerSpecies = 30;
+            NeatMain neatAlgo = new NeatMain(config, inputCount, 3, initPopulation);
             for(int count = 0; count < no_generations; count++) {
                 for(int counter = 0; counter < initPopulation; counter++) {
                     NeatBox neatBox = neatAlgo.getNextNeatBox();

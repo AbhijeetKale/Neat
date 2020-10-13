@@ -7,6 +7,21 @@ using Neat.Util;
 
 namespace Neat.Collection
 {
+    public class CompareGenomes : Comparer<Genome>
+    {
+        public override int Compare(Genome x, Genome y)
+        {
+            if (x.fitnessScore > y.fitnessScore)
+            {
+                return -1;
+            }
+            else if (x.fitnessScore < y.fitnessScore)
+            {
+                return 1;
+            }
+            return 0;
+        }
+    }
     public class Species
     {
         // implement collection of genomes as help, will reduce sort time and
@@ -77,7 +92,7 @@ namespace Neat.Collection
         // returns total genomes that have been removed as the selection process
         private int selection()
         {
-            int tobeRemoved = speciesPopulation.Count * NeatMain.config.populationSruvivalPercentagePerSpecies / 100;
+            int tobeRemoved = speciesPopulation.Count * (100 - NeatMain.config.populationSruvivalPercentagePerSpecies) / 100;
             int maxPossibleRemovals = speciesPopulation.Count - NeatMain.config.minimumPopulationPerSpecies;
             tobeRemoved = tobeRemoved > maxPossibleRemovals ? maxPossibleRemovals : tobeRemoved;
             if (tobeRemoved > 0)

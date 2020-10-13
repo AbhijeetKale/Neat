@@ -195,22 +195,6 @@ namespace Neat.Framework
         }
     }
 
-    public class CompareGenomes : Comparer<Genome>
-    {
-        public override int Compare(Genome x, Genome y)
-        {
-            if (x.fitnessScore > y.fitnessScore)
-            {
-                return -1;
-            }
-            else if (x.fitnessScore < y.fitnessScore)
-            {
-                return 1;
-            }
-            return 0;
-        }
-    }
-
     #region species
     
     #endregion
