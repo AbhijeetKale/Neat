@@ -24,8 +24,6 @@ namespace Neat.Collection
     }
     public class Species
     {
-        // implement collection of genomes as help, will reduce sort time and
-        // reduce fetching best score genome
         private List<Genome> speciesPopulation;
         // update this whenever the species is evaluated
         private int lastGenOfSpeciesEval;
@@ -61,13 +59,16 @@ namespace Neat.Collection
         // Species evaluation when one generation is completed
         // function returns number of genomes removed function
         // returns -1 if species is to be deleted
-        public int evaluateSpecies(int currentGen)
+        public int evaluateSpecies(int currentGen, double maxScoreInCurrGen)
         {
             // if best score of species is less than pervious evaluation's score delete species
             if (lastGenOfSpeciesEval - currentGen > NeatMain.config.numOfGenForSpeciesEval)
             {
+                double thresholdScore =
+                    NeatMain.config.minimumPopulationPerSpecies * maxScoreInCurrGen;
                 double currentBestScore = getMaxScoreInSpeices();
-                if (currentBestScore < bestFitnessScoreofLastEval)
+                if (currentBestScore < bestFitnessScoreofLastEval ||
+                currentBestScore < thresholdScore)
                 {
                     return -1;
                 }
@@ -79,7 +80,7 @@ namespace Neat.Collection
             return selection();
         }
 
-        private double getMaxScoreInSpeices()
+        public double getMaxScoreInSpeices()
         {
             double max = 0;
             foreach (Genome g in speciesPopulation)

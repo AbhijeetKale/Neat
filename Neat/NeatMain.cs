@@ -72,14 +72,20 @@ namespace Neat.Framework
         // after the whole population is done, check it's evaluation
         private void evaluateGeneration()
         {
+            // find a better way to find best score in generation
+            double overallMaxScore = speciesCollection[0].getMaxScoreInSpeices();
+            for(int i = 1; i < speciesCollection.Count; i++) {
+                double score = speciesCollection[i].getMaxScoreInSpeices();
+                overallMaxScore = overallMaxScore < score ? score : overallMaxScore;
+            }
             generationNo++;
             int genomeVacancy = 0;
             for (int i = 0; i < speciesCollection.Count; i++)
             {
                 Species s = speciesCollection[i];
                 // selection
-                int k = s.evaluateSpecies(generationNo);
-                if (k == -1) {
+                int k = s.evaluateSpecies(generationNo, overallMaxScore);
+                if (k == -1 || s.populationCount() == 0) {
                     // remove species
                     genomeVacancy += s.populationCount();
                     speciesCollection.RemoveAt(i);

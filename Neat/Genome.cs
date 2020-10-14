@@ -290,9 +290,9 @@ namespace Neat.Components
 
         public void mutateGenome()
         {
-            int[] mutationProbabiliteis = { NeatMain.config.geneWeightChangeProbability,
-                NeatMain.config.geneMutationProbability, NeatMain.config.nodeMutationProbability,
-                NeatMain.config.disableGeneProbability};
+            int[] mutationProbabiliteis = { NeatMain.config.geneWeightChangePercentage,
+                NeatMain.config.geneMutationPercentage, NeatMain.config.nodeMutationPercentage,
+                NeatMain.config.disableGenePercentage};
             MutationType[] mutations = { MutationType.MODIFY_WEIGHT, MutationType.ADD_GENE
                     , MutationType.ADD_NODE, MutationType.TOGGEL_GENE};
             MutationType mutation = RandomGenerator.getElementBasedonProbablity(

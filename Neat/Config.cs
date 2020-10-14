@@ -13,6 +13,8 @@ namespace Neat.Config
 		public double delta_C3 = 0;
 		public int gene_Normalization_Threshold = 1;
 		public int numOfGenForSpeciesEval = 7;
+		// min proportion of max score that species should have during evaluation
+		public double minRequiredScoreToMaxScore = 0.3;
 		//speciation
 
 		//crossover
@@ -26,11 +28,16 @@ namespace Neat.Config
 
 		//mutation
 		public int percentageOfGenomesToMutate = 10;
-		public int geneWeightChangeProbability = 40;
-		public int geneMutationProbability = 25;
-		public int nodeMutationProbability = 25;
-		public int disableGeneProbability = 10;
+		// the sum of percentages below should be excatly 100
+		// otherwise the lib will throw an error
+		public int geneWeightChangePercentage = 40;
+		public int geneMutationPercentage= 25;
+		public int nodeMutationPercentage = 25;
+		public int disableGenePercentage = 10;
+		// randomly assign any value for weight mutation of gene
 		public bool randomWeightMutation = false;
+		// Increase/Decrease of weight when randomWeightMutation is false
+		// for weight mutation
 		public double weightDeltaOnMutation = 0.1;
 		//mutation
 
