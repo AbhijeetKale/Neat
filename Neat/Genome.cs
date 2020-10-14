@@ -77,7 +77,7 @@ namespace Neat.Components
         static Dictionary<KeyValuePair<Node, Node>, int> allExistingGenes
             = new Dictionary<KeyValuePair<Node, Node>, int>();
         static int globalInnovationNumber = 1;
-
+        static int genomeNo = 0;
         private List<Node> inputNodes;
 
         private List<Node> outputNodes;
@@ -97,13 +97,17 @@ namespace Neat.Components
 
         public double fitnessScore { get; set; }
 
+        public int genomeId { get;  }
+
         public Genome(List<Node> inputNodes, List<Node> outputNodes)
         {
             this.hiddenNodes = new List<Node>();
             this.inputNodes = inputNodes;
             this.outputNodes = outputNodes;
             fitnessScore = 0;
+            graphIsDirty = true;
             species = null;
+            genomeId = ++genomeNo;
             geneLog.Add("Added from public ctor");
         }
 
@@ -112,6 +116,7 @@ namespace Neat.Components
         {
             globalInnovationNumber = 1;
             allExistingGenes.Clear();
+            genomeNo = 0;
         }
 
         public List<Gene> getGenes() => this.genes.Values.ToList<Gene>();
@@ -120,6 +125,10 @@ namespace Neat.Components
         {
             this.inputNodes = inputNodes;
             this.outputNodes = outputNodes;
+            this.genomeId = ++genomeNo;
+            this.species = null;
+            fitnessScore = 0;
+            graphIsDirty = true;
             Dictionary<int, Node> hiddenNodesMap = new Dictionary<int, Node>();
             foreach (Gene g in genesToClone)
             {
@@ -428,7 +437,6 @@ namespace Neat.Components
             Genome genome = new Genome(this.getGenes(), inputNodes, outputNodes);
             genome.fitnessScore = this.fitnessScore;
             genome.geneLog.Add("Cloned Genome");
-            genome.graphIsDirty = true;
             genome.species = this.species;
             return genome;
         }

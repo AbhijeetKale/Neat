@@ -108,11 +108,7 @@ namespace Neat.Framework
                 mutatingGenome.mutateGenome();
                 // if current genome did not have a previous species assigned or is not compatible with
                 // it's previous species, find and add the genome to another species
-                if (speciesBeforeMutation == null ||
-                    !speciesBeforeMutation.checkCompatibility(mutatingGenome))
-                {
-                    addToFittingSpeices(mutatingGenome);
-                }
+                addToFittingSpeices(mutatingGenome);
             }
 
             // crossover
@@ -177,6 +173,11 @@ namespace Neat.Framework
         public int generation;
         public int specimen;
         public int species;
+
+        public double getFitness() => genome.fitnessScore;
+
+        public int getGenomeId() => genome.genomeId;
+
         public NeatBox(Genome genome, int gen, int species, int specimen)
         {
             this.genome = genome;

@@ -11,6 +11,8 @@ namespace Neat.Util
             return num == 0 ? a : b;
         }
 
+        public static int getRandomInt() => r.Next();
+
         public static T getRandomElementFromList<T>(List<T> list)
         {
             if (list.Count == 0) {

@@ -282,7 +282,9 @@ namespace NeatTest
                         randList.Add(RandomGenerator.getRandomDouble());
                     }
                     neatBox.calculateOutput(randList);
-                    neatBox.setFitnessScore(RandomGenerator.getRandomDouble());
+                    if (neatBox.getFitness() == 0) {
+                        neatBox.setFitnessScore(RandomGenerator.getRandomInt() % 200);
+                    }
                 }
             }
             Assert.Pass();
