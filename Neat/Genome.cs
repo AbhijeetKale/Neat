@@ -390,7 +390,6 @@ namespace Neat.Components
 
         public List<double> calculateOutput(List<double> inputs)
         {
-            geneLog.Add("Calculating output");
             if (inputs.Count != inputNodes.Count)
             {
                 throw new ArgumentException("Number of inputs incorrect");
