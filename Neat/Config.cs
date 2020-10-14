@@ -17,10 +17,6 @@ namespace Neat.Config
 		public double minRequiredScoreToMaxScore = 0.3;
 		//speciation
 
-		//crossover
-		public double enableDisableFlagProbablity = 75;
-		//crossover
-
 		//Selection
 		public int populationSruvivalPercentagePerSpecies = 50;
 		public int minimumPopulationPerSpecies = 5;

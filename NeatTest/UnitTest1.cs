@@ -184,10 +184,10 @@ namespace NeatTest
             genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
 
             // checking weight mutation
-            NeatMain.config.geneWeightChangeProbability = 100;
-            NeatMain.config.geneMutationProbability = 0;
-            NeatMain.config.nodeMutationProbability = 0;
-            NeatMain.config.disableGeneProbability = 0;
+            NeatMain.config.geneWeightChangePercentage= 100;
+            NeatMain.config.geneMutationPercentage = 0;
+            NeatMain.config.nodeMutationPercentage = 0;
+            NeatMain.config.disableGenePercentage = 0;
             NeatMain.config.randomWeightMutation = false;
             genome1.mutateGenome();
             // weight mutation of +- weightdelta in config should occur in one gene
@@ -223,10 +223,10 @@ namespace NeatTest
             genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
 
             // checking weight mutation
-            NeatMain.config.geneWeightChangeProbability = 100;
-            NeatMain.config.geneMutationProbability = 0;
-            NeatMain.config.nodeMutationProbability = 0;
-            NeatMain.config.disableGeneProbability = 0;
+            NeatMain.config.geneWeightChangePercentage = 100;
+            NeatMain.config.geneMutationPercentage = 0;
+            NeatMain.config.nodeMutationPercentage = 0;
+            NeatMain.config.disableGenePercentage = 0;
             NeatMain.config.randomWeightMutation = true;
             genome1.mutateGenome();
             // weight mutation of +- weightdelta in config should occur in only one gene
@@ -273,7 +273,9 @@ namespace NeatTest
             int initPopulation = 25;
             NeatConfig config = new NeatConfig();
             config.populationSruvivalPercentagePerSpecies = 30;
-            NeatMain neatAlgo = new NeatMain(config, inputCount, 3, initPopulation);
+            NeatMain.initInstance(config, inputCount, 3, initPopulation);
+
+            NeatMain neatAlgo = NeatMain.getInstance();
             for(int count = 0; count < no_generations; count++) {
                 for(int counter = 0; counter < initPopulation; counter++) {
                     NeatBox neatBox = neatAlgo.getNextNeatBox();

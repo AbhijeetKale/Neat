@@ -11,16 +11,17 @@ namespace Neat.Framework
     {
         public static NeatConfig config = new NeatConfig();
         static int generationNo = 0;
-        protected int innovationNumber = 1;
-
         List<Node> inputNodes;
         List<Node> outputNodes;
         List<Species> speciesCollection;
         int currentSpeciesIndex = -1;
         int currentGenomeIndex = -1;
+        static NeatMain instance;
 
-        public NeatMain(NeatConfig config, int inputNodeCount, int outputNodeCount, int initPopulationCount)
+        private NeatMain(NeatConfig config, int inputNodeCount, int outputNodeCount,
+                            int initPopulationCount)
         {
+            configSanity(config);
             NeatMain.config = config;
             speciesCollection = new List<Species>();
             inputNodes = new List<Node>();
@@ -36,6 +37,16 @@ namespace Neat.Framework
             }
             initPopulation(initPopulationCount);
         }
+
+        public static void initInstance(NeatConfig config, int inputNodeCount,
+            int outputNodeCount, int initPopulationCount) {
+            if (instance == null)
+            {
+                instance = new NeatMain(config, inputNodeCount, outputNodeCount, initPopulationCount);
+            }
+        }
+
+        public static NeatMain getInstance() => instance;
 
         private void initPopulation(int initPopulationCount)
         {
@@ -74,7 +85,8 @@ namespace Neat.Framework
         {
             // find a better way to find best score in generation
             double overallMaxScore = speciesCollection[0].getMaxScoreInSpeices();
-            for(int i = 1; i < speciesCollection.Count; i++) {
+            for (int i = 1; i < speciesCollection.Count; i++)
+            {
                 double score = speciesCollection[i].getMaxScoreInSpeices();
                 overallMaxScore = overallMaxScore < score ? score : overallMaxScore;
             }
@@ -85,11 +97,14 @@ namespace Neat.Framework
                 Species s = speciesCollection[i];
                 // selection
                 int k = s.evaluateSpecies(generationNo, overallMaxScore);
-                if (k == -1 || s.populationCount() == 0) {
+                if (k == -1 || s.populationCount() == 0)
+                {
                     // remove species
                     genomeVacancy += s.populationCount();
                     speciesCollection.RemoveAt(i);
-                } else {
+                }
+                else
+                {
                     genomeVacancy += k;
                 }
             }
@@ -108,7 +123,7 @@ namespace Neat.Framework
             genomeVacancy -= mutationCount;
             for (int i = 0; i < mutationCount; i++)
             {
-                Genome mutatingGenome = (Genome) RandomGenerator
+                Genome mutatingGenome = (Genome)RandomGenerator
                     .getRandomElementFromList<Genome>(allGenomes).Clone();
                 Species speciesBeforeMutation = mutatingGenome.species;
                 mutatingGenome.mutateGenome();
@@ -170,6 +185,31 @@ namespace Neat.Framework
             Genome genome = speciesCollection[currentSpeciesIndex].getGenome(currentGenomeIndex);
             return new NeatBox(genome, generationNo, currentSpeciesIndex, currentGenomeIndex);
         }
+        private void configSanity(NeatConfig config)
+        {
+            if (config.minRequiredScoreToMaxScore > 1.0
+                || config.minRequiredScoreToMaxScore < 0.0)
+                throw new NeatConfigException("minRequiredScoreToMaxScore needs to be between 0 <-> 1");
+            if (config.populationSruvivalPercentagePerSpecies > 100
+                || config.populationSruvivalPercentagePerSpecies < 0)
+                throw new NeatConfigException("populationSruvivalPercentagePerSpecies needs to be between 0 <-> 100");
+            if (config.percentageOfGenomesToMutate > 100
+                || config.percentageOfGenomesToMutate < 0)
+                throw new NeatConfigException("percentageOfGenomesToMutate needs to be between 0 <-> 100");
+            int totalPercentage = config.geneWeightChangePercentage + config.geneMutationPercentage
+                + config.nodeMutationPercentage + config.disableGenePercentage;
+            if (totalPercentage != 100)
+                throw new NeatConfigException("Total percentage sum of " +
+                " geneWeightChangePercentage, geneMutationPercentage, nodeMutationPercentage," +
+                " disableGenePercentage needs to be between 0 <-> 100");
+            if (config.weightDeltaOnMutation > 1.0
+                || config.weightDeltaOnMutation < 0.0)
+                throw new NeatConfigException("weightDeltaOnMutation needs to be between 0 <-> 1");
+        }
+    }
+    public class NeatConfigException : Exception
+    {
+        public NeatConfigException(String err) : base(err) { }
     }
     #endregion
 
@@ -201,8 +241,4 @@ namespace Neat.Framework
             return this.genome.geneLog;
         }
     }
-
-    #region species
-    
-    #endregion
 }
