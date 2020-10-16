@@ -4,6 +4,7 @@ using Neat.Components;
 using Neat.Util;
 using System;
 using Neat.Collection;
+
 namespace Neat.Framework
 {
     #region NeatMain

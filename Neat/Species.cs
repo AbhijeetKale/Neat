@@ -7,7 +7,7 @@ using Neat.Util;
 
 namespace Neat.Collection
 {
-    public class CompareGenomes : Comparer<Genome>
+    internal class CompareGenomes : Comparer<Genome>
     {
         public override int Compare(Genome x, Genome y)
         {
@@ -22,7 +22,7 @@ namespace Neat.Collection
             return 0;
         }
     }
-    public class Species
+    internal class Species
     {
         private List<Genome> speciesPopulation;
         // update this whenever the species is evaluated
