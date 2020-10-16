@@ -70,7 +70,9 @@ namespace Neat.Collection
                 if (currentBestScore < bestFitnessScoreofLastEval ||
                 currentBestScore < thresholdScore)
                 {
-                    return -1;
+                    int totalCount = speciesPopulation.Count;
+                    this.speciesPopulation.Clear();
+                    return totalCount;
                 }
                 bestFitnessScoreofLastEval = currentBestScore;
                 this.lastGenOfSpeciesEval = currentGen;
