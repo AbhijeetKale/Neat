@@ -219,7 +219,7 @@ namespace Neat.Framework
 
         public int getGenomeId() => genome.genomeId;
 
-        public NeatBox(Genome genome, int gen, int species, int specimen)
+        internal NeatBox(Genome genome, int gen, int species, int specimen)
         {
             this.genome = genome;
             this.generation = gen;
