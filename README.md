@@ -59,8 +59,7 @@ double delta_C3 | Weight of variation in weights of matching genes between two g
 int gene_Normalization_Threshold | min number of gnenes required in any one genome to normalize the variation between two genomes | Any | 1
 int numOfGenForSpeciesEval | number of generations before a species is evaluated to other species. If found weak, the species will be removed from the population | Any | 7
 double minRequiredScoreToMaxScore | This parameter helps decide whether the species is weak or strong by comparing it's highest fitness score with the product of minRequiredScoreToMaxScore and overall maximum fitness score. | 0.0 to 1.0 | 0.3
-int populationSruvivalPercentagePerSpecies | The percentage of top genomes (with best fitness score) within a species that sruvive and go into the next generation.
-This is per species |  0 to 100 | 50
+int populationSruvivalPercentagePerSpecies | The percentage of top genomes (with best fitness score) within a species that sruvive and go into the next generation. This is per species |  0 to 100 | 50
 int minimumPopulationPerSpecies | The minnimum population of a species. No genomes will be removed if the population of a species go below the value of this parameter/ | > 1 | 5
 int percentageOfGenomesToMutate | The percentage of surviving genomes to mutate and add to the next gen after a whole generation is run. | 0 to 100 | 10
 int geneWeightChangePercentage  | Chance that a mutation will result in a change in weight changes within a gene. | 0 to 100 | 40
@@ -70,7 +69,7 @@ int disableGenePercentage  | Chance that a mutation will result in an existing g
 bool randomWeightMutation  | When a weight is mutatted for a gene assign it a weight randomly. | true, false | false
 double weightDeltaOnMutation | If randomWeightMutation is not set, a weight mutation will occur with the addition/subtraction of this value | Any | 0.1
 double minWeight | Minimum weight that can be assigned to a gene | Any | -1
-double maxWeight Maximum weight that can be assigned to a gene | Any | 1
+double maxWeight | Maximum weight that can be assigned to a gene | Any | 1
 
 NOTE: The sum of geneWeightChangePercentage, geneMutationPercentage, nodeMutationPercentage, disableGenePercentage should be exactly 100.
 
