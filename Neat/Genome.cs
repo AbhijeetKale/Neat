@@ -70,8 +70,7 @@ namespace Neat.Components
             return g;
         }
     }
-
-    public class Genome : ICloneable
+    internal class Genome : ICloneable
     {
         //from node -> to Node to inovationNumber
         static Dictionary<KeyValuePair<Node, Node>, int> allExistingGenes
