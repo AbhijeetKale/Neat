@@ -7,14 +7,14 @@ using Neat.Collection;
 
 namespace Neat.Components
 {
-    public enum NodeType
+    internal enum NodeType
     {
         INPUT,
         OUTPUT,
         HIDDEN
     }
 
-    public enum MutationType
+    internal enum MutationType
     {
         MODIFY_WEIGHT,
         ADD_GENE,
@@ -22,7 +22,7 @@ namespace Neat.Components
         TOGGEL_GENE
     }
 
-    public class Node : ICloneable
+    internal class Node : ICloneable
     {
         public int nodeId { get; }
         public NodeType nodetype { get; }
@@ -47,7 +47,7 @@ namespace Neat.Components
         }
     }
 
-    public class Gene : ICloneable
+    internal class Gene : ICloneable
     {
         public Node from { get; }
         public Node to { get; }
@@ -88,7 +88,7 @@ namespace Neat.Components
 
         public List<String> geneLog = new List<string>();
 
-        public Species species { get; set; }
+        internal Species species { get; set; }
 
         // 
         private Dictionary<Node, List<Gene>> nodeDependencyGraph;
@@ -99,7 +99,7 @@ namespace Neat.Components
 
         public int genomeId { get;  }
 
-        public Genome(List<Node> inputNodes, List<Node> outputNodes)
+        internal Genome(List<Node> inputNodes, List<Node> outputNodes)
         {
             this.hiddenNodes = new List<Node>();
             this.inputNodes = inputNodes;
@@ -119,7 +119,7 @@ namespace Neat.Components
             genomeNo = 0;
         }
 
-        public List<Gene> getGenes() => this.genes.Values.ToList<Gene>();
+        internal List<Gene> getGenes() => this.genes.Values.ToList<Gene>();
 
         private Genome(List<Gene> genesToClone, List<Node> inputNodes, List<Node> outputNodes)
         {
@@ -149,7 +149,7 @@ namespace Neat.Components
             geneLog.Add("Added from private ctor");
         }
 
-        public bool addNewGene(Node from, Node to, double weight)
+        internal bool addNewGene(Node from, Node to, double weight)
         {
 
             geneLog.Add("Trying to add Gene to Genome");
@@ -191,7 +191,7 @@ namespace Neat.Components
             return true;
         }
 
-        public Node addHiddenNodeBetween(Gene gene)
+        internal Node addHiddenNodeBetween(Gene gene)
         {
             // create node id based on the number of nodes that have been created for this structure
             // If any duplicate mutation occurs within the same generation, this will help kekep track
@@ -222,7 +222,7 @@ namespace Neat.Components
             }
         }
 
-        public Gene getGene(int inovationNumber)
+        internal Gene getGene(int inovationNumber)
         {
             Gene output;
             if (this.genes.TryGetValue(inovationNumber, out output))
@@ -232,7 +232,7 @@ namespace Neat.Components
             return null;
         }
 
-        public bool hasGene(Gene gene)
+        internal bool hasGene(Gene gene)
         {
             return hasGene(gene.inovationNumber);
         }
