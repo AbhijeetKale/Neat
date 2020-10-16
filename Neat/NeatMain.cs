@@ -96,16 +96,10 @@ namespace Neat.Framework
             {
                 Species s = speciesCollection[i];
                 // selection
-                int k = s.evaluateSpecies(generationNo, overallMaxScore);
-                if (k == -1 || s.populationCount() == 0)
-                {
+                genomeVacancy += s.evaluateSpecies(generationNo, overallMaxScore);
+                if (s.populationCount() == 0) {
                     // remove species
-                    genomeVacancy += s.populationCount();
                     speciesCollection.RemoveAt(i);
-                }
-                else
-                {
-                    genomeVacancy += k;
                 }
             }
             List<Genome> allGenomes = new List<Genome>();
