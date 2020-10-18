@@ -7,7 +7,7 @@ using Neat.Collection;
 
 namespace Neat.Components
 {
-    internal enum NodeType
+    public enum NodeType
     {
         INPUT,
         OUTPUT,
@@ -77,11 +77,11 @@ namespace Neat.Components
             = new Dictionary<KeyValuePair<Node, Node>, int>();
         static int globalInnovationNumber = 1;
         static int genomeNo = 0;
-        private List<Node> inputNodes;
+        internal List<Node> inputNodes;
 
-        private List<Node> outputNodes;
+        internal List<Node> outputNodes;
 
-        private List<Node> hiddenNodes;
+        internal List<Node> hiddenNodes;
 
         private SortedList<int, Gene> genes = new SortedList<int, Gene>();
 
@@ -89,7 +89,7 @@ namespace Neat.Components
 
         internal Species species { get; set; }
 
-        // 
+        // map of Node x to all edges which end at node x
         private Dictionary<Node, List<Gene>> nodeDependencyGraph;
 
         private bool graphIsDirty = true;
@@ -201,7 +201,7 @@ namespace Neat.Components
             }
             int totalNodes = inputNodes.Count + hiddenNodes.Count + outputNodes.Count;
             // incremental node id
-            Node newNode = new Node(totalNodes, NodeType.HIDDEN);
+            Node newNode = new Node(totalNodes + 1, NodeType.HIDDEN);
             hiddenNodes.Add(newNode);
             this.removeGene(gene.inovationNumber);
             this.addNewGene(gene.from, newNode, 1.0);

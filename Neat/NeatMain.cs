@@ -4,6 +4,7 @@ using Neat.Components;
 using Neat.Util;
 using System;
 using Neat.Collection;
+using Neat.Ui;
 
 namespace Neat.Framework
 {
@@ -40,7 +41,8 @@ namespace Neat.Framework
         }
 
         public static void initInstance(NeatConfig config, int inputNodeCount,
-            int outputNodeCount, int initPopulationCount) {
+            int outputNodeCount, int initPopulationCount)
+        {
             if (instance == null)
             {
                 instance = new NeatMain(config, inputNodeCount, outputNodeCount, initPopulationCount);
@@ -98,7 +100,8 @@ namespace Neat.Framework
                 Species s = speciesCollection[i];
                 // selection
                 genomeVacancy += s.evaluateSpecies(generationNo, overallMaxScore);
-                if (s.populationCount() == 0) {
+                if (s.populationCount() == 0)
+                {
                     // remove species
                     speciesCollection.RemoveAt(i);
                 }
@@ -214,7 +217,7 @@ namespace Neat.Framework
         public int generation;
         public int specimen;
         public int species;
-
+        public NeatUiData ui;
         public double getFitness() => genome.fitnessScore;
 
         public int getGenomeId() => genome.genomeId;
@@ -225,6 +228,7 @@ namespace Neat.Framework
             this.generation = gen;
             this.specimen = specimen;
             this.species = species;
+            ui = new NeatUiData(genome);
         }
 
         public List<double> calculateOutput(List<double> input) =>
