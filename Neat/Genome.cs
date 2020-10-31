@@ -145,12 +145,11 @@ namespace Neat.Components
                 }
             }
             this.hiddenNodes = hiddenNodesMap.Values.ToList<Node>();
-            geneLog.Add("Added from private ctor");
         }
 
         internal bool addNewGene(Node from, Node to, double weight)
         {
-
+            // TODO(abhijeet): Check for cyclic dependency in neural net before adding a new gene
             geneLog.Add("Trying to add Gene to Genome");
             // Gene validations
             if (!((inputNodes.Contains(from) || hiddenNodes.Contains(from))
@@ -174,8 +173,7 @@ namespace Neat.Components
                     return false;
                 }
                 this.genes.Add(newInovationNumber, newGene);
-                geneLog.Add(
-                "Added existing gene with inovation " + newInovationNumber + " to genome");
+                geneLog.Add("Added previously seen gene from " + from.nodeId + " to " + to.nodeId);
             }
             else
             {
@@ -183,8 +181,7 @@ namespace Neat.Components
                 allExistingGenes.Add(nodePair, newInovationNumber);
                 newGene = new Gene(from, to, weight, newInovationNumber);
                 this.genes.Add(newGene.inovationNumber, newGene);
-                geneLog.Add(
-                "Added new gene with inovation " + newInovationNumber + " to genome");
+                geneLog.Add("Added new gene from " + from.nodeId + " to " + to.nodeId);
             }
             graphIsDirty = true;
             return true;
@@ -284,9 +281,10 @@ namespace Neat.Components
             {
                 crossoverResult.Add(genes2[j++]);
             }
-            return new Genome(crossoverResult, parent1.inputNodes, parent1.outputNodes);
+            Genome result = new Genome(crossoverResult, parent1.inputNodes, parent1.outputNodes);
+            result.geneLog.Add("Generated from crossOver");
+            return result;
         }
-
         public void mutateGenome()
         {
             int[] mutationProbabiliteis = { NeatMain.config.geneWeightChangePercentage,
@@ -318,6 +316,11 @@ namespace Neat.Components
                     }
                     Node from = RandomGenerator.getRandomElementFromList<Node>(possibleFromNodes);
                     Node to = RandomGenerator.getRandomElementFromList<Node>(possibleToNodes);
+                    while (from.nodeId == to.nodeId)
+                    {
+                        to = RandomGenerator.getRandomElementFromList<Node>(possibleToNodes);
+                    }
+
                     double weight = RandomGenerator.getRandomDouble();
                     if (!this.addNewGene(from, to, weight))
                     {
@@ -335,6 +338,7 @@ namespace Neat.Components
                 case MutationType.TOGGEL_GENE:
                     Gene r = RandomGenerator.getRandomElementFromList(geneList);
                     r.disabled = !r.disabled;
+                    geneLog.Add("Toggled gene from node " + r.from.nodeId + " to node " + r.to.nodeId + " disabled = " + r.disabled);
                     break;
             }
             graphIsDirty = true;
@@ -394,11 +398,8 @@ namespace Neat.Components
                 throw new ArgumentException("Number of inputs incorrect");
             }
             int totalCount = inputNodes.Count + outputNodes.Count + hiddenNodes.Count;
-            double[] activationValues = new double[totalCount + 1];
-            for (int i = 0; i < totalCount; i++)
-            {
-                activationValues[i] = default;
-            }
+            // nodeId to node's activation value
+            Dictionary<int, double> activationValues = new Dictionary<int, double>();
             for (int i = 0; i < inputs.Count; i++)
             {
                 activationValues[inputNodes[i].nodeId] = inputs[i];
@@ -416,12 +417,12 @@ namespace Neat.Components
             return output;
         }
 
-        private void setActivationValue(double[] activationValues, Node node)
+        private void setActivationValue(Dictionary<int, double> activationValues, Node node)
         {
             activationValues[node.nodeId] = 0;
             foreach (Gene gene in nodeDependencyGraph[node])
             {
-                if (activationValues[gene.from.nodeId] == default)
+                if (!activationValues.ContainsKey(gene.from.nodeId))
                 {
                     setActivationValue(activationValues, gene.from);
                 }
