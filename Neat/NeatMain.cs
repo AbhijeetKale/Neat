@@ -57,20 +57,17 @@ namespace Neat.Framework
             speciesCollection.Add(new Species(0));
             for (int count = 0; count < initPopulationCount; count++)
             {
-                int minGenesCount = 1;
-                int maxGenesCount = inputNodes.Count * outputNodes.Count;
                 Genome genome = new Genome(inputNodes, outputNodes);
-                int numOfGenes = max(minGenesCount, RandomGenerator.randomNumBefore(maxGenesCount));
-                for (int i = 0; i < numOfGenes; i++)
-                {
-                    Node from = RandomGenerator.getRandomElementFromList(inputNodes);
-                    Node to = RandomGenerator.getRandomElementFromList(outputNodes);
-                    double weight = RandomGenerator.getRandomDouble();
-                    // already existing genes would not be added to same genome
-                    // even if it's not added, it would not be a problem since
-                    // our purpose is to randomly initialize genomes
-                    genome.addNewGene(from, to, weight);
-                }
+                // initialize just on random gene
+                // NOTE: We are initializing with only one gene per genome
+                // because it has been observed in previous versions of the 
+                // code that if number of genes added  is bigger initially,
+                // eventually the population may get stuck in a rutt 
+                // with very very limitted future evolution
+                Node from = RandomGenerator.getRandomElementFromList(inputNodes);
+                Node to = RandomGenerator.getRandomElementFromList(outputNodes);
+                double weight = RandomGenerator.getRandomDouble();
+                genome.addNewGene(from, to, weight);
                 addToFittingSpeices(genome);
             }
         }

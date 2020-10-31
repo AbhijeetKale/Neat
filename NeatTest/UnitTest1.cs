@@ -35,7 +35,7 @@ namespace NeatTest
             List<Node> nodes = new List<Node>();
             for (int count = 0; count < inputNodeCount; count++)
             {
-                nodes.Add(new Node(count, NodeType.INPUT));
+                nodes.Add(new Node(count + 1, NodeType.INPUT));
             }
             return nodes;
         }
@@ -46,7 +46,7 @@ namespace NeatTest
             for (int count = inputNodeCount;
             count < inputNodeCount + outputNodeCount; count++)
             {
-                nodes.Add(new Node(count, NodeType.OUTPUT));
+                nodes.Add(new Node(count + 1, NodeType.OUTPUT));
             }
             return nodes;
         }
@@ -106,7 +106,7 @@ namespace NeatTest
             genome1.fitnessScore = 4;
             genome2.fitnessScore = 10;
             child = Genome.crossover(genome1, genome2);
-            int[] result2 = { 2, 3, 4, 5, 6};
+            int[] result2 = { 2, 3, 4, 5, 6 };
             checkGenomeResult(child, result2);
 
             // genome 2 lower fitness score
@@ -130,14 +130,14 @@ namespace NeatTest
             genome1.fitnessScore = 10;
             genome2.fitnessScore = 10;
             Genome child = Genome.crossover(genome1, genome2);
-            int[] result = { 1, 2, 3, 4};
+            int[] result = { 1, 2, 3, 4 };
             checkGenomeResult(child, result);
 
             // genome 1 lower fitness score
             genome1.fitnessScore = 4;
             genome2.fitnessScore = 10;
             child = Genome.crossover(genome1, genome2);
-            int[] result2 = { 3, 4};
+            int[] result2 = { 3, 4 };
             checkGenomeResult(child, result2);
 
             // genome 2 lower fitness score
@@ -161,7 +161,7 @@ namespace NeatTest
             genome1.addNewGene(inputNodes[2], outputNodes[0], 5);
             Gene g = genome1.getGene(4);
             Node newNode = genome1.addHiddenNodeBetween(g);
-            int[] result = { 1, 2, 3, 5, 6, 7};
+            int[] result = { 1, 2, 3, 5, 6, 7 };
             checkGenomeResult(genome1, result);
             Gene newGene1 = genome1.getGene(6);
             Assert.AreEqual(newGene1.from, g.from);
@@ -184,7 +184,7 @@ namespace NeatTest
             genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
 
             // checking weight mutation
-            NeatMain.config.geneWeightChangePercentage= 100;
+            NeatMain.config.geneWeightChangePercentage = 100;
             NeatMain.config.geneMutationPercentage = 0;
             NeatMain.config.nodeMutationPercentage = 0;
             NeatMain.config.disableGenePercentage = 0;
@@ -194,7 +194,7 @@ namespace NeatTest
             int weightMutatedCount = 0;
             double[] originalWeights = { 0.1, 0.2, 0.3, 0.4, 0.5 };
             int idx = 0;
-            foreach(Gene gene in genome1.getGenes())
+            foreach (Gene gene in genome1.getGenes())
             {
                 if (originalWeights[idx] != gene.weight)
                 {
@@ -202,7 +202,7 @@ namespace NeatTest
                     if (!(delta == NeatMain.config.weightDeltaOnMutation
                         || delta == -NeatMain.config.weightDeltaOnMutation))
                     {
-                       Assert.Fail();
+                        Assert.Fail();
                     }
                     weightMutatedCount++;
                 }
@@ -256,10 +256,33 @@ namespace NeatTest
             genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
             Gene g = genome1.getGene(4);
             Node newNode = genome1.addHiddenNodeBetween(g);
-            double[] input = { 1, 2, 3, 4, 5};
-            double[] result = { 2.2, 1.4};
+            double[] input = { 1, 2, 3, 4, 5 };
+            double[] result = { 2.2, 1.4 };
             List<double> output = genome1.calculateOutput(new List<double>(input));
-            for(int i = 0; i < output.Count; i++)
+            for (int i = 0; i < output.Count; i++)
+            {
+                Assert.AreEqual(result[i], output[i]);
+            }
+            Assert.Pass();
+        }
+        // Failing test: This will run properly when cyclic dependency is fixed
+        [Test]
+        public void calculateOutputTest2()
+        {
+            genome1.fitnessScore = 4;
+            genome1.addNewGene(inputNodes[0], outputNodes[0], 0.1);
+            genome1.addNewGene(inputNodes[0], outputNodes[1], 0.2);
+            genome1.addNewGene(inputNodes[1], outputNodes[0], 0.3);
+            genome1.addNewGene(inputNodes[2], outputNodes[1], 0.4);
+            genome1.addNewGene(inputNodes[2], outputNodes[0], 0.5);
+            Node hidden1 = genome1.addHiddenNodeBetween(genome1.getGene(1));
+            Node hidden2 = genome1.addHiddenNodeBetween(genome1.getGene(2));
+            genome1.addNewGene(hidden1, hidden2, 0.4);
+            genome1.addNewGene(hidden2, hidden1, 0.8);
+            double[] input = { 1, 2, 3, 4, 5 };
+            double[] result = { 2.2, 1.4 };
+            List<double> output = genome1.calculateOutput(new List<double>(input));
+            for (int i = 0; i < output.Count; i++)
             {
                 Assert.AreEqual(result[i], output[i]);
             }
@@ -267,33 +290,39 @@ namespace NeatTest
         }
 
         [Test]
-        public void MainTest() {
-            int no_generations = 15;
+        public void MainTest()
+        {
+            int no_generations = 1000;
             int inputCount = 5;
-            int initPopulation = 25;
+            int initPopulation = 200;
             NeatConfig config = new NeatConfig();
             config.populationSruvivalPercentagePerSpecies = 30;
             NeatMain.initInstance(config, inputCount, 3, initPopulation);
 
             NeatMain neatAlgo = NeatMain.getInstance();
-            for(int count = 0; count < no_generations; count++) {
-                for(int counter = 0; counter < initPopulation; counter++) {
+            for (int count = 0; count < no_generations; count++)
+            {
+                for (int counter = 0; counter < initPopulation; counter++)
+                {
                     NeatBox neatBox = neatAlgo.getNextNeatBox();
                     List<double> randList = new List<double>();
-                    for (int i = 0; i < inputCount; i++) {
+                    for (int i = 0; i < inputCount; i++)
+                    {
                         randList.Add(RandomGenerator.getRandomDouble());
                     }
                     neatBox.calculateOutput(randList);
-                    if (neatBox.getFitness() == 0) {
+                    if (neatBox.getFitness() == 0)
+                    {
                         neatBox.setFitnessScore(RandomGenerator.getRandomInt() % 200);
                     }
                 }
             }
+
             Assert.Pass();
         }
         void printGenome(Genome genome)
         {
-            foreach(Gene gene in genome.getGenes())
+            foreach (Gene gene in genome.getGenes())
             {
                 Console.Write(gene.inovationNumber + " ");
             }
